@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دسترسی ندارید | انجمن نجوم NOVA</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <section class="panel container">
+        <div class="auth-card card reveal" style="text-align:center">
+          <h1 class="gradient-text" id="denied-title">دسترسی ندارید</h1>
+          <p class="muted" id="denied-text">برای ادامه، لطفاً وارد شوید.</p>
+          <div class="form-actions" style="justify-content:center;margin-top:1.5rem">
+            <a class="btn" href="index.html">صفحهٔ اصلی</a>
+            <button class="btn btn-ghost" type="button" id="switch-account">ورود با حساب دیگر</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/panel.js" defer></script>
+  <script src="assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var A = window.NovaAuth;
+      var params = new URLSearchParams(window.location.search);
+      var reason = params.get("reason");
+      var title = document.getElementById("denied-title");
+      var text = document.getElementById("denied-text");
+
+      if (reason === "pending") {
+        title.textContent = "در انتظار تأیید";
+        text.textContent = "حساب شما هنوز توسط مدیر انجمن تأیید نشده است، یا غیرفعال شده است. پس از تأیید می‌توانید به پنل دسترسی داشته باشید.";
+      } else if (reason === "role") {
+        title.textContent = "دسترسی ندارید";
+        text.textContent = "نقش کاربری شما اجازهٔ دسترسی به این بخش را ندارد.";
+      }
+
+      document.getElementById("switch-account").addEventListener("click", function () {
+        if (A.configured) A.signOut(null).then(function () { window.location.href = "login.html"; });
+        else window.location.href = "login.html";
+      });
+    });
+  </script>
+</body>
+</html>

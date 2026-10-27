@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مدیران انجمن | انجمن نجوم NOVA</title>
+  <meta name="description" content="اعضای هیئت مدیره و مسئولان بخش‌های مختلف انجمن نجوم NOVA.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <header class="page-hero container reveal">
+        <h1 class="gradient-text">مدیران انجمن</h1>
+        <p>کسانی که هر هفته برای برپایی شب‌های رصد و کارگاه‌ها تلاش می‌کنند.</p>
+      </header>
+
+      <section class="section container">
+        <div id="admins-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));"></div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/admins.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+      var admins = window.NOVA_ADMINS || [];
+      var grid = document.getElementById("admins-grid");
+
+      // حروف اول نام برای آواتار وقتی عکس نیست
+      function initials(name) {
+        var parts = String(name).replace(/\(.*?\)/g, "").trim().split(/\s+/);
+        return (parts[0] ? parts[0].charAt(0) : "") + (parts[1] ? parts[1].charAt(0) : "");
+      }
+
+      grid.innerHTML = admins.map(function (a, i) {
+        var avatar = a.photo
+          ? '<img src="' + N.escapeHtml(a.photo) + '" alt="' + N.escapeHtml(a.name) + '" loading="lazy">'
+          : N.escapeHtml(initials(a.name));
+        return '<article class="card admin-card reveal" data-delay="' + (i % 3) + '">' +
+          '<div class="avatar" aria-hidden="true">' + avatar + "</div>" +
+          "<h3>" + N.escapeHtml(a.name) + "</h3>" +
+          '<p class="admin-role">' + N.escapeHtml(a.role) + "</p>" +
+          "<p>" + N.escapeHtml(a.bio) + "</p>" +
+          "</article>";
+      }).join("");
+
+      N.reveal(grid);
+    });
+  </script>
+</body>
+</html>

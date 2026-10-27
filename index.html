@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>انجمن نجوم و فناوری‌های فضایی NOVA</title>
+  <meta name="description" content="انجمن نجوم و فناوری‌های فضایی NOVA؛ رصد، آموزش و کشف جهان بی‌کران.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <!-- هیرو -->
+      <section class="hero container">
+        <div>
+          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <defs>
+              <radialGradient id="hero-core" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#ffb3ec"/>
+                <stop offset="70%" stop-color="#7b4dff"/><stop offset="100%" stop-color="#3a6bff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g stroke="url(#hero-core)" stroke-width="2" stroke-linecap="round" opacity=".9">
+              <line x1="32" y1="4" x2="32" y2="60"/><line x1="4" y1="32" x2="60" y2="32"/>
+              <line x1="12" y1="12" x2="52" y2="52"/><line x1="52" y1="12" x2="12" y2="52"/>
+            </g>
+            <circle cx="32" cy="32" r="16" fill="url(#hero-core)"/>
+            <circle cx="32" cy="32" r="6" fill="#ffffff"/>
+          </svg>
+          <h1 class="gradient-text reveal">انجمن نجوم و فناوری‌های فضایی NOVA</h1>
+          <p class="slogan reveal" data-delay="1">ستاره‌ها را نگاه کنیم، پرسش‌ها را بپرسیم؛ هر شب، زیر آسمانی بی‌کران.</p>
+          <div class="hero-actions reveal" data-delay="2">
+            <a class="btn btn-join" href="about.html#membership">عضویت در انجمن</a>
+            <a class="btn btn-ghost" href="events.html">رویدادهای پیش رو</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- رویدادهای نزدیک -->
+      <section class="section container" aria-labelledby="upcoming-title">
+        <h2 id="upcoming-title" class="section-title reveal">رویدادهای نزدیک</h2>
+        <div id="upcoming-events" class="grid"></div>
+        <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="events.html">همه رویدادها و رصدها</a></p>
+      </section>
+
+      <!-- آخرین مقالات -->
+      <section class="section container" aria-labelledby="latest-title">
+        <h2 id="latest-title" class="section-title reveal">آخرین مقالات و اخبار</h2>
+        <div id="latest-articles" class="grid"></div>
+        <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="news.html">همه اخبار و مقالات</a></p>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/events.js" defer></script>
+  <script src="data/articles.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+      var typeLabels = { workshop: "کارگاه", talk: "سخنرانی", observation: "رصد شبانه" };
+
+      // سه رویداد آینده و نزدیک
+      var upcoming = (window.NOVA_EVENTS || [])
+        .filter(function (ev) { return N.isFuture(ev.date); })
+        .sort(function (a, b) { return a.date < b.date ? -1 : 1; })
+        .slice(0, 3);
+
+      var evBox = document.getElementById("upcoming-events");
+      evBox.innerHTML = upcoming.length ? upcoming.map(function (ev, i) {
+        return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+          '<span class="tag tag-future">' + typeLabels[ev.type] + "</span>" +
+          "<h3>" + N.escapeHtml(ev.title) + "</h3>" +
+          '<div class="meta"><span>' + N.escapeHtml(ev.jalali) + "</span></div>" +
+          "<p>" + N.escapeHtml(ev.description) + "</p>" +
+          '<div class="card-actions"><a class="btn btn-sm" href="' + N.escapeHtml(ev.link) + '">ثبت‌نام</a></div>' +
+          "</article>";
+      }).join("") : '<p class="empty-state">فعلاً رویداد آیندهٔ ثبت‌شده‌ای نیست.</p>';
+
+      // سه مقالهٔ آخر
+      var articles = (window.NOVA_ARTICLES || []).slice(0, 3);
+      var artBox = document.getElementById("latest-articles");
+      artBox.innerHTML = articles.map(function (a, i) {
+        return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+          '<div class="card-media"></div>' +
+          "<h3>" + N.escapeHtml(a.title) + "</h3>" +
+          '<div class="meta"><span>' + N.escapeHtml(a.author) + "</span><span>" + N.escapeHtml(a.date) + "</span></div>" +
+          "<p>" + N.escapeHtml(a.summary) + "</p>" +
+          '<div class="card-actions"><a class="btn btn-ghost btn-sm" href="news.html#' + N.escapeHtml(a.id) + '">ادامه مطلب</a></div>' +
+          "</article>";
+      }).join("");
+
+      N.reveal(document);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>رویدادها و رصدها | انجمن نجوم NOVA</title>
+  <meta name="description" content="تقویم رویدادها، کارگاه‌ها، سخنرانی‌ها و شب‌های رصد انجمن نجوم NOVA.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <header class="page-hero container reveal">
+        <h1 class="gradient-text">رویدادها و رصدها</h1>
+        <p>کارگاه، سخنرانی و شب‌های رصد؛ برای هر سطحی از علاقه، جایی هست.</p>
+      </header>
+
+      <section class="section container">
+        <div class="chips" role="group" aria-label="فیلتر زمان">
+          <button type="button" class="chip" data-filter="upcoming" aria-pressed="true">آینده</button>
+          <button type="button" class="chip" data-filter="past" aria-pressed="false">گذشته</button>
+          <button type="button" class="chip" data-filter="all" aria-pressed="false">همه</button>
+        </div>
+        <div class="chips" role="group" aria-label="فیلتر نوع رویداد" id="type-filters">
+          <button type="button" class="chip" data-type="all" aria-pressed="true">همهٔ انواع</button>
+          <button type="button" class="chip" data-type="workshop" aria-pressed="false">کارگاه</button>
+          <button type="button" class="chip" data-type="talk" aria-pressed="false">سخنرانی</button>
+          <button type="button" class="chip" data-type="observation" aria-pressed="false">رصد شبانه</button>
+        </div>
+
+        <div id="events-list" class="grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/events.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+      var typeLabels = { workshop: "کارگاه", talk: "سخنرانی", observation: "رصد شبانه" };
+      var state = { time: "upcoming", type: "all" };
+      var list = document.getElementById("events-list");
+
+      function render() {
+        var items = (window.NOVA_EVENTS || []).filter(function (ev) {
+          var future = N.isFuture(ev.date);
+          if (state.time === "upcoming" && !future) return false;
+          if (state.time === "past" && future) return false;
+          if (state.type !== "all" && ev.type !== state.type) return false;
+          return true;
+        });
+
+        // آینده: نزدیک‌ترین اول؛ گذشته: جدیدترین اول
+        items.sort(function (a, b) {
+          return state.time === "past" ? (a.date < b.date ? 1 : -1) : (a.date < b.date ? -1 : 1);
+        });
+
+        list.innerHTML = items.length ? items.map(function (ev, i) {
+          var future = N.isFuture(ev.date);
+          var statusTag = future
+            ? '<span class="tag tag-future">پیش رو</span>'
+            : '<span class="tag tag-past">برگزار شده</span>';
+          var action = future
+            ? '<a class="btn btn-sm" href="' + N.escapeHtml(ev.link) + '">ثبت‌نام</a>'
+            : '<span class="tag tag-past">ثبت‌نام بسته شد</span>';
+          return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+            '<div class="meta"><span class="tag">' + typeLabels[ev.type] + "</span> " + statusTag + "</div>" +
+            "<h3>" + N.escapeHtml(ev.title) + "</h3>" +
+            '<div class="meta"><span>📅 ' + N.escapeHtml(ev.jalali) + "</span></div>" +
+            '<div class="meta"><span>📍 ' + N.escapeHtml(ev.location) + "</span></div>" +
+            "<p>" + N.escapeHtml(ev.description) + "</p>" +
+            '<div class="card-actions">' + action + "</div>" +
+            "</article>";
+        }).join("") : '<p class="empty-state">رویدادی با این فیلتر پیدا نشد.</p>';
+
+        N.reveal(list);
+      }
+
+      function setPressed(group, attr, value) {
+        group.querySelectorAll(".chip").forEach(function (btn) {
+          btn.setAttribute("aria-pressed", String(btn.getAttribute(attr) === value));
+        });
+      }
+
+      document.querySelectorAll("[data-filter]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          state.time = btn.getAttribute("data-filter");
+          setPressed(btn.parentElement, "data-filter", state.time);
+          render();
+        });
+      });
+
+      document.getElementById("type-filters").addEventListener("click", function (e) {
+        var btn = e.target.closest(".chip");
+        if (!btn) return;
+        state.type = btn.getAttribute("data-type");
+        setPressed(this, "data-type", state.type);
+        render();
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>

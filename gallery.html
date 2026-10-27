@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>گالری آسمان | انجمن نجوم NOVA</title>
+  <meta name="description" content="گالری تصاویر آسمان، رصد و کهکشان‌ها از اعضای انجمن نجوم NOVA.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <header class="page-hero container reveal">
+        <h1 class="gradient-text">گالری آسمان</h1>
+        <p>تصاویری از ماه، سیارات، خوشه‌ها و کهکشان‌ها؛ ثبت‌شده توسط اعضای انجمن. روی هر تصویر کلیک کنید تا بزرگ‌تر ببینید.</p>
+      </header>
+
+      <section class="section container">
+        <div id="gallery-grid" class="gallery-grid"></div>
+        <p class="placeholder-note" style="margin-top:1.5rem">(تصاویر فعلی جای‌نگهدار هستند؛ مسیر تصاویر واقعی را در data/gallery.js قرار دهید.)</p>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <!-- لایت‌باکس -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="نمایش بزرگ تصویر" hidden>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="بستن">×</button>
+    <figure class="lightbox-figure">
+      <div class="lightbox-media" id="lightbox-media"></div>
+      <figcaption id="lightbox-caption"></figcaption>
+    </figure>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/gallery.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+      var items = window.NOVA_GALLERY || [];
+      var grid = document.getElementById("gallery-grid");
+      var box = document.getElementById("lightbox");
+      var mediaBox = document.getElementById("lightbox-media");
+      var caption = document.getElementById("lightbox-caption");
+      var lastFocus = null;
+
+      function mediaHtml(item, big) {
+        if (item.src) {
+          return '<img src="' + N.escapeHtml(item.src) + '" alt="' + N.escapeHtml(item.title) + '" loading="lazy">';
+        }
+        return '<span class="tile-number">' + N.toFa(item.id) + "</span>";
+      }
+
+      grid.innerHTML = items.map(function (item, i) {
+        return '<button type="button" class="tile reveal" data-delay="' + (i % 3) + '" data-index="' + i + '" aria-label="بزرگ‌نمایی: ' + N.escapeHtml(item.title) + '">' +
+          mediaHtml(item, false) +
+          '<span class="tile-caption">' + N.escapeHtml(item.title) + "</span>" +
+          "</button>";
+      }).join("");
+      N.reveal(grid);
+
+      function open(index) {
+        var item = items[index];
+        if (!item) return;
+        lastFocus = document.activeElement;
+        mediaBox.innerHTML = mediaHtml(item, true);
+        caption.textContent = item.title + " — " + item.date;
+        box.hidden = false;
+        box.classList.add("open");
+        document.getElementById("lightbox-close").focus();
+      }
+
+      function close() {
+        box.classList.remove("open");
+        box.hidden = true;
+        mediaBox.innerHTML = "";
+        if (lastFocus) lastFocus.focus();
+      }
+
+      grid.addEventListener("click", function (e) {
+        var tile = e.target.closest(".tile");
+        if (tile) open(Number(tile.getAttribute("data-index")));
+      });
+      document.getElementById("lightbox-close").addEventListener("click", close);
+      box.addEventListener("click", function (e) { if (e.target === box) close(); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && box.classList.contains("open")) close();
+      });
+    });
+  </script>
+</body>
+</html>

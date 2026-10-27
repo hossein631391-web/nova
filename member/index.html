@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>پروفایل من | پنل اعضا NOVA</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page panel-loading">
+      <section class="panel container">
+        <div class="panel-head">
+          <div>
+            <h1 class="gradient-text">پروفایل من</h1>
+            <p class="muted">اطلاعات حساب و عضویت خود را مشاهده و ویرایش کنید.</p>
+          </div>
+        </div>
+
+        <nav class="subnav" aria-label="بخش‌های پنل عضو">
+          <a href="index.html" aria-current="page">پروفایل</a>
+          <a href="tasks.html" id="nav-tasks" class="hidden">تسک‌های من</a>
+        </nav>
+
+        <div id="page-alert" class="alert hidden" role="alert"></div>
+
+        <div class="two-col">
+          <form id="profile-form" class="card reveal" novalidate>
+            <h2 class="section-title" style="font-size:1.25rem">اطلاعات شخصی</h2>
+            <div class="field">
+              <label for="p-name">نام و نام خانوادگی</label>
+              <input class="input" id="p-name" type="text" maxlength="120" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="p-phone">شماره تماس</label>
+              <input class="input" id="p-phone" type="tel" dir="ltr" maxlength="20" autocomplete="tel" placeholder="09xxxxxxxxx">
+            </div>
+            <div class="form-actions">
+              <button class="btn" type="submit" id="save-btn">ذخیرهٔ تغییرات</button>
+            </div>
+          </form>
+
+          <aside class="card reveal" data-delay="1">
+            <h2 class="section-title" style="font-size:1.25rem">وضعیت عضویت</h2>
+            <p>وضعیت حساب: <span id="p-status"></span></p>
+            <p>نقش: <span id="p-role"></span></p>
+            <p>تاریخ درخواست عضویت: <span id="p-created" class="muted"></span></p>
+            <p class="help" id="p-role-help"></p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="../assets/js/config.js" defer></script>
+  <script src="../assets/js/stars.js" defer></script>
+  <script src="../assets/js/main.js" defer></script>
+  <script src="../assets/js/panel.js" defer></script>
+  <script src="../assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      var state = await A.guard("member");
+      if (!state) return;
+
+      var client = A.client();
+      var profile = state.profile;
+      var form = document.getElementById("profile-form");
+      var alertBox = document.getElementById("page-alert");
+      var saveBtn = document.getElementById("save-btn");
+
+      document.getElementById("p-name").value = profile.full_name || "";
+      document.getElementById("p-phone").value = profile.phone || "";
+      document.getElementById("p-status").innerHTML = P.statusBadge(profile.status);
+      document.getElementById("p-role").innerHTML = P.roleBadge(profile.role);
+      document.getElementById("p-created").textContent = P.fmtDate(profile.created_at);
+
+      var isActive = profile.role === "active" || profile.role === "admin";
+      if (isActive) {
+        document.getElementById("nav-tasks").classList.remove("hidden");
+        document.getElementById("p-role-help").textContent =
+          "به‌عنوان عضو فعال، تسک‌های تخصیص‌داده‌شده به شما را در بخش «تسک‌های من» می‌بینید.";
+      } else {
+        document.getElementById("p-role-help").textContent =
+          "دسترسی به تسک‌ها مخصوص اعضای فعال است؛ با مدیر انجمن در این باره صحبت کنید.";
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        P.setAlert(alertBox, "", "");
+        var name = document.getElementById("p-name").value.trim();
+        var phone = P.normalizeDigits(document.getElementById("p-phone").value.trim());
+
+        if (!name) { P.setAlert(alertBox, "error", "نام و نام خانوادگی الزامی است."); return; }
+        if (phone && !/^[0-9+\- ]{7,20}$/.test(phone)) { P.setAlert(alertBox, "error", "شماره تماس معتبر نیست."); return; }
+
+        saveBtn.disabled = true;
+        try {
+          var res = await client.from("profiles")
+            .update({ full_name: name, phone: phone || null })
+            .eq("id", state.user.id)
+            .select("full_name, phone")
+            .single();
+          if (res.error) throw res.error;
+          document.getElementById("p-phone").value = res.data.phone || "";
+          P.setAlert(alertBox, "success", "اطلاعات شما با موفقیت ذخیره شد.");
+          P.toast("اطلاعات ذخیره شد.", "success");
+        } catch (err) {
+          P.setAlert(alertBox, "error", P.errorMessage(err));
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

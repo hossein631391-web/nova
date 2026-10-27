@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مدیریت تسک‌ها | NOVA</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page panel-loading">
+      <section class="panel container">
+        <div class="panel-head">
+          <div>
+            <h1 class="gradient-text">مدیریت تسک‌ها</h1>
+            <p class="muted">تسک بسازید، به اعضای فعال تخصیص دهید و پیشرفت هر عضو را دنبال کنید.</p>
+          </div>
+        </div>
+
+        <nav class="subnav" aria-label="بخش‌های پنل مدیریت">
+          <a href="index.html">داشبورد</a>
+          <a href="members.html">اعضا</a>
+          <a href="tasks.html" aria-current="page">تسک‌ها</a>
+        </nav>
+
+        <div id="page-alert" class="alert hidden" role="alert"></div>
+
+        <!-- فرم ساخت / ویرایش تسک -->
+        <form id="task-form" class="card reveal" novalidate style="margin-bottom:2rem">
+          <h2 class="section-title" style="font-size:1.25rem" id="form-title">تسک جدید</h2>
+          <input type="hidden" id="task-id">
+
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="t-title">عنوان تسک <span class="muted">(الزامی)</span></label>
+              <input class="input" id="t-title" type="text" maxlength="200" required>
+            </div>
+            <div class="field span-2">
+              <label for="t-desc">توضیح</label>
+              <textarea class="textarea" id="t-desc" rows="3" maxlength="2000"></textarea>
+            </div>
+            <div class="field">
+              <label for="t-due">مهلت انجام</label>
+              <input class="input" id="t-due" type="date" dir="ltr">
+            </div>
+            <div class="field">
+              <label for="t-priority">اولویت</label>
+              <select class="select" id="t-priority">
+                <option value="low">کم</option>
+                <option value="medium" selected>متوسط</option>
+                <option value="high">زیاد</option>
+              </select>
+            </div>
+            <div class="field span-2">
+              <label>تخصیص به اعضای فعال</label>
+              <div class="checks" id="assignees">
+                <span class="help">در حال بارگذاری اعضا…</span>
+              </div>
+              <p class="help">فقط اعضای فعال تأییدشده در این فهرست هستند. برای افزودن عضو، ابتدا نقش او را از بخش اعضا به «عضو فعال» تغییر دهید.</p>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" type="submit" id="save-task">ذخیرهٔ تسک</button>
+            <button class="btn btn-ghost" type="button" id="cancel-edit">پاک کردن فرم</button>
+          </div>
+        </form>
+
+        <div id="tasks-grid" class="card-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="../assets/js/config.js" defer></script>
+  <script src="../assets/js/stars.js" defer></script>
+  <script src="../assets/js/main.js" defer></script>
+  <script src="../assets/js/panel.js" defer></script>
+  <script src="../assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      var state = await A.guard("admin");
+      if (!state) return;
+
+      var client = A.client();
+      var myId = state.user.id;
+      var alertBox = document.getElementById("page-alert");
+      var form = document.getElementById("task-form");
+      var saveBtn = document.getElementById("save-task");
+      var gridEl = document.getElementById("tasks-grid");
+      var assigneesEl = document.getElementById("assignees");
+      var tasks = [];
+      var activeMembers = [];     // اعضای فعال تأییدشده
+      var editing = null;         // تسکی که در حال ویرایش است
+      var PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
+
+      /* ---------- بارگذاری ---------- */
+      async function loadMembers() {
+        var res = await client.from("profiles")
+          .select("id, full_name")
+          .eq("role", "active")
+          .eq("status", "approved")
+          .order("full_name", { ascending: true });
+        if (res.error) throw res.error;
+        activeMembers = res.data || [];
+      }
+
+      async function loadTasks() {
+        var res = await client.from("tasks")
+          .select("id, title, description, due_date, priority, created_at, task_assignments(id, user_id, status, updated_at, profiles(full_name))")
+          .order("created_at", { ascending: false });
+        if (res.error) throw res.error;
+        tasks = res.data || [];
+        tasks.sort(function (a, b) {
+          var da = a.due_date || "9999-12-31", db = b.due_date || "9999-12-31";
+          if (da !== db) return da < db ? -1 : 1;
+          return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+        });
+        renderTasks();
+      }
+
+      /* ---------- فهرست اعضا برای تخصیص ---------- */
+      // اعضای فعال + هر عضوی که از قبل به این تسک تخصیص داده شده (حتی اگر نقشش عوض شده)
+      function renderAssignees(selectedIds) {
+        var options = activeMembers.slice();
+        selectedIds.forEach(function (uid) {
+          if (!options.some(function (m) { return m.id === uid; })) {
+            var found = null;
+            tasks.forEach(function (t) {
+              (t.task_assignments || []).forEach(function (a) {
+                if (a.user_id === uid && a.profiles && !found) found = { id: uid, full_name: a.profiles.full_name };
+              });
+            });
+            options.push(found || { id: uid, full_name: "عضو" });
+          }
+        });
+
+        assigneesEl.innerHTML = options.length
+          ? options.map(function (m) {
+              var checked = selectedIds.indexOf(m.id) !== -1 ? " checked" : "";
+              return '<label class="check"><input type="checkbox" value="' + P.esc(m.id) + '"' + checked + "> " +
+                P.esc(m.full_name || "بدون نام") + "</label>";
+            }).join("")
+          : '<span class="help">هنوز عضو فعالی وجود ندارد.</span>';
+      }
+
+      function selectedAssignees() {
+        return Array.prototype.map.call(
+          assigneesEl.querySelectorAll('input[type="checkbox"]:checked'),
+          function (el) { return el.value; }
+        );
+      }
+
+      /* ---------- نمایش تسک‌ها ---------- */
+      function taskCardHtml(t) {
+        var assignments = t.task_assignments || [];
+        var total = assignments.length;
+        var done = assignments.filter(function (a) { return a.status === "done"; }).length;
+        var pct = total ? Math.round((done / total) * 100) : 0;
+        var list = total
+          ? assignments.map(function (a) {
+              return '<li><div class="row"><strong>' + P.esc((a.profiles && a.profiles.full_name) || "عضو") + "</strong>" +
+                P.taskStatusBadge(a.status) + "</div>" +
+                '<p class="help">آخرین تغییر: ' + P.esc(P.fmtDateTime(a.updated_at)) + "</p>" +
+                '<div class="notes-list" data-assignment="' + P.esc(a.id) + '"></div></li>';
+            }).join("")
+          : '<li class="help">به هیچ عضوی تخصیص داده نشده است.</li>';
+
+        return '<article class="card task-card reveal" data-task="' + P.esc(t.id) + '">' +
+          '<div class="meta">' + P.priorityBadge(t.priority) + "<span>مهلت: " + P.esc(P.fmtDate(t.due_date)) + "</span></div>" +
+          "<h3>" + P.esc(t.title) + "</h3>" +
+          '<p class="muted">' + P.esc(t.description || "توضیحی ثبت نشده است.") + "</p>" +
+          '<div class="progress" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="پیشرفت تسک">' +
+          '<span style="width:' + pct + '%"></span></div>' +
+          '<p class="help">' + P.toFa(done) + " از " + P.toFa(total) + " عضو انجام داده‌اند</p>" +
+          '<div class="card-actions">' +
+          '<button type="button" class="btn btn-ghost btn-sm" data-act="edit">ویرایش</button>' +
+          '<button type="button" class="btn btn-danger btn-sm" data-act="delete">حذف</button>' +
+          "</div>" +
+          '<details class="progress-details"><summary>پیشرفت هر عضو</summary>' +
+          '<ul class="assignee-list">' + list + "</ul></details>" +
+          "</article>";
+      }
+
+      function renderTasks() {
+        gridEl.innerHTML = tasks.length
+          ? tasks.map(taskCardHtml).join("")
+          : '<p class="empty-state">هنوز تسکی ثبت نشده است.</p>';
+        window.Nova.reveal(gridEl);
+      }
+
+      // یادداشت‌های هر تخصیص، فقط وقتی بخش پیشرفت باز می‌شود بارگذاری می‌شود
+      async function loadNotesFor(card) {
+        var ids = Array.prototype.map.call(card.querySelectorAll(".notes-list[data-assignment]"),
+          function (el) { return el.getAttribute("data-assignment"); });
+        if (!ids.length) return;
+        var res = await client.from("task_notes")
+          .select("assignment_id, body, created_at")
+          .in("assignment_id", ids)
+          .order("created_at", { ascending: true });
+        if (res.error) { P.toast(P.errorMessage(res.error), "error"); return; }
+
+        card.querySelectorAll(".notes-list[data-assignment]").forEach(function (box) {
+          var aid = box.getAttribute("data-assignment");
+          var mine = (res.data || []).filter(function (n) { return n.assignment_id === aid; });
+          box.innerHTML = mine.map(function (n) {
+            return '<div class="note"><small>' + P.esc(P.fmtDateTime(n.created_at)) + "</small>" + P.esc(n.body) + "</div>";
+          }).join("");
+        });
+        card.setAttribute("data-notes-loaded", "1");
+      }
+
+      /* ---------- فرم ---------- */
+      function resetForm() {
+        editing = null;
+        form.reset();
+        document.getElementById("task-id").value = "";
+        document.getElementById("form-title").textContent = "تسک جدید";
+        document.getElementById("t-priority").value = "medium";
+        renderAssignees([]);
+      }
+
+      function fillForm(t) {
+        editing = t;
+        document.getElementById("task-id").value = t.id;
+        document.getElementById("form-title").textContent = "ویرایش تسک";
+        document.getElementById("t-title").value = t.title || "";
+        document.getElementById("t-desc").value = t.description || "";
+        document.getElementById("t-due").value = t.due_date || "";
+        document.getElementById("t-priority").value = t.priority || "medium";
+        renderAssignees((t.task_assignments || []).map(function (a) { return a.user_id; }));
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        P.setAlert(alertBox, "", "");
+
+        var id = document.getElementById("task-id").value;
+        var title = document.getElementById("t-title").value.trim();
+        if (!title) { P.setAlert(alertBox, "error", "عنوان تسک را وارد کنید."); return; }
+
+        var payload = {
+          title: title,
+          description: document.getElementById("t-desc").value.trim() || null,
+          due_date: document.getElementById("t-due").value || null,
+          priority: document.getElementById("t-priority").value
+        };
+        var selected = selectedAssignees();
+
+        saveBtn.disabled = true;
+        try {
+          var taskId = id;
+          if (!id) {
+            var ins = await client.from("tasks")
+              .insert(Object.assign({}, payload, { created_by: myId }))
+              .select("id")
+              .single();
+            if (ins.error) throw ins.error;
+            taskId = ins.data.id;
+          } else {
+            var upd = await client.from("tasks").update(payload).eq("id", id);
+            if (upd.error) throw upd.error;
+          }
+
+          // همگام‌سازی تخصیص‌ها: حذف‌شده‌ها پاک و تازه‌ها اضافه می‌شوند؛ وضعیت قبلی حفظ می‌شود
+          var existingIds = editing ? (editing.task_assignments || []).map(function (a) { return a.user_id; }) : [];
+          var toRemove = existingIds.filter(function (u) { return selected.indexOf(u) === -1; });
+          var toAdd = selected.filter(function (u) { return existingIds.indexOf(u) === -1; });
+
+          if (toRemove.length) {
+            var del = await client.from("task_assignments").delete().eq("task_id", taskId).in("user_id", toRemove);
+            if (del.error) throw del.error;
+          }
+          if (toAdd.length) {
+            var add = await client.from("task_assignments").insert(toAdd.map(function (u) {
+              return { task_id: taskId, user_id: u };
+            }));
+            if (add.error) throw add.error;
+          }
+
+          P.toast(id ? "تسک به‌روزرسانی شد." : "تسک ساخته شد.", "success");
+          resetForm();
+          await loadTasks();
+        } catch (err) {
+          P.setAlert(alertBox, "error", P.errorMessage(err));
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+
+      document.getElementById("cancel-edit").addEventListener("click", resetForm);
+
+      /* ---------- عملیات روی کارت‌ها ---------- */
+      gridEl.addEventListener("click", async function (e) {
+        var button = e.target.closest("button[data-act]");
+        if (!button) return;
+        var card = button.closest(".task-card");
+        var t = tasks.find(function (x) { return x.id === card.getAttribute("data-task"); });
+        if (!t) return;
+
+        if (button.getAttribute("data-act") === "edit") {
+          fillForm(t);
+          return;
+        }
+
+        if (button.getAttribute("data-act") === "delete") {
+          var ok = await P.confirmDialog(
+            "آیا تسک «" + t.title + "» حذف شود؟ همهٔ تخصیص‌ها و یادداشت‌های آن هم پاک می‌شوند و این کار قابل بازگشت نیست.",
+            { confirmText: "حذف تسک", danger: true }
+          );
+          if (!ok) return;
+          button.disabled = true;
+          var res = await client.from("tasks").delete().eq("id", t.id);
+          if (res.error) {
+            P.toast(P.errorMessage(res.error), "error");
+            button.disabled = false;
+            return;
+          }
+          P.toast("تسک حذف شد.", "success");
+          if (editing && editing.id === t.id) resetForm();
+          await loadTasks();
+        }
+      });
+
+      // بارگذاری یادداشت‌ها هنگام باز شدن بخش پیشرفت
+      gridEl.addEventListener("toggle", function (e) {
+        var d = e.target;
+        if (d.tagName === "DETAILS" && d.open) {
+          var card = d.closest(".task-card");
+          if (card && card.getAttribute("data-notes-loaded") !== "1") loadNotesFor(card);
+        }
+      }, true);
+
+      /* ---------- شروع ---------- */
+      try {
+        await loadMembers();
+        renderAssignees([]);
+        await loadTasks();
+      } catch (err) {
+        P.setAlert(alertBox, "error", P.errorMessage(err));
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>درخواست عضویت | انجمن نجوم NOVA</title>
+  <meta name="description" content="فرم درخواست عضویت در انجمن نجوم و فناوری‌های فضایی NOVA.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <section class="panel container">
+        <div class="auth-card card reveal">
+          <h1 class="gradient-text">درخواست عضویت</h1>
+          <p class="muted center">پس از ثبت درخواست، مدیر انجمن آن را بررسی و تأیید می‌کند. تا آن زمان به پنل دسترسی ندارید.</p>
+
+          <div id="register-alert" class="alert hidden" role="alert"></div>
+
+          <form id="register-form" novalidate>
+            <div class="field">
+              <label for="reg-name">نام و نام خانوادگی <span class="muted">(الزامی)</span></label>
+              <input class="input" id="reg-name" name="full_name" type="text" autocomplete="name" maxlength="120" required>
+            </div>
+            <div class="field">
+              <label for="reg-phone">شماره تماس</label>
+              <input class="input" id="reg-phone" name="phone" type="tel" dir="ltr" autocomplete="tel" maxlength="20" placeholder="09xxxxxxxxx">
+            </div>
+            <div class="field">
+              <label for="reg-email">ایمیل <span class="muted">(الزامی)</span></label>
+              <input class="input" id="reg-email" name="email" type="email" dir="ltr" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="reg-password">رمز عبور <span class="muted">(حداقل ۸ کاراکتر)</span></label>
+              <input class="input" id="reg-password" name="password" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+            </div>
+            <div class="field">
+              <label for="reg-password2">تکرار رمز عبور</label>
+              <input class="input" id="reg-password2" name="password2" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+            </div>
+            <button class="btn" type="submit" id="register-submit" style="width:100%">ثبت درخواست عضویت</button>
+          </form>
+
+          <div class="auth-links">
+            قبلاً ثبت‌نام کرده‌اید؟ <a href="login.html">ورود به پنل</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/panel.js" defer></script>
+  <script src="assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      var alertBox = document.getElementById("register-alert");
+      var form = document.getElementById("register-form");
+      var submitBtn = document.getElementById("register-submit");
+
+      if (!A.configured) {
+        P.setAlert(alertBox, "error", "اتصال به Supabase تنظیم نشده است؛ فایل assets/js/config.js را کامل کنید.");
+        submitBtn.disabled = true;
+        return;
+      }
+
+      var client = A.client();
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        P.setAlert(alertBox, "", "");
+
+        var name = document.getElementById("reg-name").value.trim();
+        var phone = P.normalizeDigits(document.getElementById("reg-phone").value.trim());
+        var email = document.getElementById("reg-email").value.trim();
+        var password = document.getElementById("reg-password").value;
+        var password2 = document.getElementById("reg-password2").value;
+
+        if (!name) { P.setAlert(alertBox, "error", "نام و نام خانوادگی را وارد کنید."); return; }
+        if (phone && !/^[0-9+\- ]{7,20}$/.test(phone)) { P.setAlert(alertBox, "error", "شماره تماس معتبر نیست."); return; }
+        if (!email) { P.setAlert(alertBox, "error", "ایمیل را وارد کنید."); return; }
+        if (password.length < 8) { P.setAlert(alertBox, "error", "رمز عبور حداقل باید ۸ کاراکتر باشد."); return; }
+        if (password !== password2) { P.setAlert(alertBox, "error", "رمز عبور و تکرار آن یکسان نیستند."); return; }
+
+        submitBtn.disabled = true;
+        try {
+          var res = await client.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: { full_name: name, phone: phone || null },
+              emailRedirectTo: new URL("login.html", window.location.href).href
+            }
+          });
+          if (res.error) throw res.error;
+
+          // Supabase برای ایمیل تکراری کاربر بدون هویت برمی‌گرداند
+          if (res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0) {
+            throw new Error("User already registered");
+          }
+
+          // اگر تأیید ایمیل خاموش باشد، نشست ساخته می‌شود؛ کاربر تا تأیید مدیر نباید وارد باشد
+          if (res.data.session) await client.auth.signOut();
+
+          form.reset();
+          P.setAlert(alertBox, "success",
+            "درخواست عضویت شما ثبت شد. اگر ایمیل تأیید دریافت کردید، آن را تأیید کنید. " +
+            "پس از تأیید مدیر انجمن، می‌توانید وارد پنل شوید.");
+        } catch (err) {
+          P.setAlert(alertBox, "error", P.errorMessage(err));
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>اخبار و مقالات | انجمن نجوم NOVA</title>
+  <meta name="description" content="مقالات آموزشی، اخبار و گزارش‌های رصد انجمن نجوم NOVA.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <header class="page-hero container reveal">
+        <h1 class="gradient-text">اخبار و مقالات</h1>
+        <p>آموزش، خبر و گزارش‌های رصد؛ هر آنچه از آسمان و فضا می‌آموزیم.</p>
+      </header>
+
+      <!-- نمای جزئیات مقاله (با هش #art-xxx باز می‌شود) -->
+      <section id="article-detail" class="section container" hidden></section>
+
+      <!-- نمای فهرست -->
+      <section id="article-list" class="section container">
+        <div class="chips" role="group" aria-label="فیلتر دسته‌بندی">
+          <button type="button" class="chip" data-cat="all" aria-pressed="true">همه</button>
+          <button type="button" class="chip" data-cat="educational" aria-pressed="false">آموزشی</button>
+          <button type="button" class="chip" data-cat="news" aria-pressed="false">خبر</button>
+          <button type="button" class="chip" data-cat="observation" aria-pressed="false">گزارش رصد</button>
+        </div>
+        <div id="articles-grid" class="grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/articles.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+      var catLabels = { educational: "آموزشی", news: "خبر", observation: "گزارش رصد" };
+      var articles = window.NOVA_ARTICLES || [];
+      var grid = document.getElementById("articles-grid");
+      var detail = document.getElementById("article-detail");
+      var listSection = document.getElementById("article-list");
+      var category = "all";
+
+      function cardHtml(a, i) {
+        return '<article class="card reveal" data-delay="' + (i % 3) + '" id="' + N.escapeHtml(a.id) + '">' +
+          '<div class="card-media">' + (a.image
+            ? '<img src="' + N.escapeHtml(a.image) + '" alt="" loading="lazy">' : "") + "</div>" +
+          '<div class="meta"><span class="tag">' + catLabels[a.category] + "</span></div>" +
+          "<h3>" + N.escapeHtml(a.title) + "</h3>" +
+          '<div class="meta"><span>' + N.escapeHtml(a.author) + "</span><span>" + N.escapeHtml(a.date) + "</span></div>" +
+          "<p>" + N.escapeHtml(a.summary) + "</p>" +
+          '<div class="card-actions"><a class="btn btn-ghost btn-sm" href="#' + N.escapeHtml(a.id) + '">ادامه مطلب</a></div>' +
+          "</article>";
+      }
+
+      function renderList() {
+        var items = articles.filter(function (a) {
+          return category === "all" || a.category === category;
+        });
+        grid.innerHTML = items.length ? items.map(cardHtml).join("")
+          : '<p class="empty-state">مقاله‌ای در این دسته‌بندی نیست.</p>';
+        N.reveal(grid);
+      }
+
+      function renderDetail(a) {
+        detail.innerHTML =
+          '<article class="card article reveal is-visible">' +
+          '<p><a class="btn btn-ghost btn-sm" href="#" id="back-to-list">← بازگشت به فهرست</a></p>' +
+          '<div class="meta"><span class="tag">' + catLabels[a.category] + "</span></div>" +
+          "<h1>" + N.escapeHtml(a.title) + "</h1>" +
+          '<div class="meta"><span>' + N.escapeHtml(a.author) + "</span><span>" + N.escapeHtml(a.date) + "</span></div>" +
+          '<div class="article-body">' + a.body.map(function (p) {
+            return "<p>" + N.escapeHtml(p) + "</p>";
+          }).join("") + "</div>" +
+          "</article>";
+        detail.hidden = false;
+        listSection.hidden = true;
+        document.getElementById("back-to-list").addEventListener("click", function (e) {
+          e.preventDefault();
+          history.replaceState(null, "", "news.html");
+          showList();
+        });
+      }
+
+      function showList() {
+        detail.hidden = true;
+        detail.innerHTML = "";
+        listSection.hidden = false;
+        renderList();
+      }
+
+      function routeFromHash() {
+        var id = window.location.hash.slice(1);
+        var found = id && articles.find(function (a) { return a.id === id; });
+        if (found) renderDetail(found);
+        else showList();
+      }
+
+      document.querySelectorAll("[data-cat]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          category = btn.getAttribute("data-cat");
+          document.querySelectorAll("[data-cat]").forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b === btn));
+          });
+          renderList();
+        });
+      });
+
+      window.addEventListener("hashchange", routeFromHash);
+      routeFromHash();
+    });
+  </script>
+</body>
+</html>

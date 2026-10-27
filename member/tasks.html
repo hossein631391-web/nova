@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسک‌های من | پنل اعضا NOVA</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page panel-loading">
+      <section class="panel container">
+        <div class="panel-head">
+          <div>
+            <h1 class="gradient-text">تسک‌های من</h1>
+            <p class="muted">تسک‌هایی که به شما تخصیص داده شده را ببینید، وضعیتشان را تغییر دهید و یادداشت بگذارید.</p>
+          </div>
+        </div>
+
+        <nav class="subnav" aria-label="بخش‌های پنل عضو">
+          <a href="index.html">پروفایل</a>
+          <a href="tasks.html" aria-current="page">تسک‌های من</a>
+        </nav>
+
+        <div id="page-alert" class="alert hidden" role="alert"></div>
+
+        <div class="toolbar">
+          <div class="field">
+            <label for="status-filter">فیلتر بر اساس وضعیت</label>
+            <select class="select" id="status-filter">
+              <option value="all">همه</option>
+              <option value="new">جدید</option>
+              <option value="in_progress">در حال انجام</option>
+              <option value="done">انجام‌شده</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="tasks-list" class="card-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="../assets/js/config.js" defer></script>
+  <script src="../assets/js/stars.js" defer></script>
+  <script src="../assets/js/main.js" defer></script>
+  <script src="../assets/js/panel.js" defer></script>
+  <script src="../assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      // فقط اعضای فعال (و مدیران) به این صفحه دسترسی دارند
+      var state = await A.guard("active");
+      if (!state) return;
+
+      var client = A.client();
+      var uid = state.user.id;
+      var listEl = document.getElementById("tasks-list");
+      var filterEl = document.getElementById("status-filter");
+      var alertBox = document.getElementById("page-alert");
+      var items = [];
+      var PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
+      var STATUS_OPTIONS = [["new", "جدید"], ["in_progress", "در حال انجام"], ["done", "انجام‌شده"]];
+
+      async function load() {
+        // تسک‌ها از طریق RLS فقط برای تخصیص‌های خود همین کاربر برگردانده می‌شوند
+        var res = await client.from("task_assignments")
+          .select("id, status, updated_at, tasks(id, title, description, due_date, priority)")
+          .eq("user_id", uid);
+        if (res.error) throw res.error;
+
+        items = (res.data || []).filter(function (r) { return r.tasks; });
+        items.sort(function (a, b) {
+          var da = a.tasks.due_date || "9999-12-31";
+          var db = b.tasks.due_date || "9999-12-31";
+          if (da !== db) return da < db ? -1 : 1;
+          return PRIORITY_RANK[a.tasks.priority] - PRIORITY_RANK[b.tasks.priority];
+        });
+        render();
+      }
+
+      function cardHtml(r) {
+        var t = r.tasks;
+        var id = P.esc(r.id);
+        var opts = STATUS_OPTIONS.map(function (o) {
+          return '<option value="' + o[0] + '"' + (o[0] === r.status ? " selected" : "") + ">" + o[1] + "</option>";
+        }).join("");
+
+        return '<article class="card task-card reveal" data-assignment="' + id + '">' +
+          '<div class="meta">' + P.priorityBadge(t.priority) + "<span>مهلت: " + P.fmtDate(t.due_date) + "</span></div>" +
+          "<h3>" + P.esc(t.title) + "</h3>" +
+          '<p class="muted">' + P.esc(t.description || "توضیحی ثبت نشده است.") + "</p>" +
+          '<div class="field"><label for="st-' + id + '">وضعیت</label>' +
+          '<select class="select status-select" id="st-' + id + '">' + opts + "</select></div>" +
+          '<details class="notes-box"><summary>یادداشت‌ها</summary>' +
+          '<div class="notes-list"></div>' +
+          '<form class="note-form" novalidate>' +
+          '<div class="field"><label for="nt-' + id + '">یادداشت جدید</label>' +
+          '<textarea class="textarea" id="nt-' + id + '" rows="3" maxlength="1000" required></textarea></div>' +
+          '<button class="btn btn-sm" type="submit">افزودن یادداشت</button>' +
+          "</form></details></article>";
+      }
+
+      function render() {
+        var filter = filterEl.value;
+        var visible = items.filter(function (r) { return filter === "all" || r.status === filter; });
+        listEl.innerHTML = visible.length
+          ? visible.map(cardHtml).join("")
+          : '<p class="empty-state">تسکی با این فیلتر پیدا نشد.</p>';
+        window.Nova.reveal(listEl);
+      }
+
+      async function loadNotes(card) {
+        var id = card.getAttribute("data-assignment");
+        var box = card.querySelector(".notes-list");
+        var res = await client.from("task_notes")
+          .select("body, created_at")
+          .eq("assignment_id", id)
+          .order("created_at", { ascending: true });
+        if (res.error) { box.textContent = P.errorMessage(res.error); return; }
+        box.innerHTML = (res.data || []).length
+          ? res.data.map(function (n) {
+              return '<div class="note"><small>' + P.fmtDateTime(n.created_at) + "</small>" + P.esc(n.body) + "</div>";
+            }).join("")
+          : '<p class="help">هنوز یادداشتی ثبت نشده است.</p>';
+        card.setAttribute("data-loaded", "1");
+      }
+
+      async function onStatusChange(e) {
+        var sel = e.target;
+        if (!sel.classList.contains("status-select")) return;
+        var card = sel.closest(".task-card");
+        var id = card.getAttribute("data-assignment");
+        var newStatus = sel.value;
+        sel.disabled = true;
+        var res = await client.from("task_assignments")
+          .update({ status: newStatus })
+          .eq("id", id)
+          .select("id, status")
+          .single();
+        sel.disabled = false;
+        if (res.error) {
+          P.toast(P.errorMessage(res.error), "error");
+          await load();
+          return;
+        }
+        var item = items.find(function (x) { return x.id === id; });
+        if (item) item.status = newStatus;
+        P.toast("وضعیت تسک به‌روز شد.", "success");
+      }
+
+      async function onAddNote(e) {
+        e.preventDefault();
+        var form = e.target;
+        var card = form.closest(".task-card");
+        var id = card.getAttribute("data-assignment");
+        var ta = form.querySelector("textarea");
+        var body = ta.value.trim();
+        if (!body) { P.toast("متن یادداشت خالی است.", "error"); return; }
+
+        var res = await client.from("task_notes").insert({ assignment_id: id, user_id: uid, body: body });
+        if (res.error) { P.toast(P.errorMessage(res.error), "error"); return; }
+        ta.value = "";
+        card.removeAttribute("data-loaded");
+        await loadNotes(card);
+        P.toast("یادداشت ثبت شد.", "success");
+      }
+
+      filterEl.addEventListener("change", render);
+      listEl.addEventListener("change", onStatusChange);
+      listEl.addEventListener("submit", onAddNote);
+      // یادداشت‌ها فقط وقتی باز می‌شوند بارگذاری می‌شوند
+      listEl.addEventListener("toggle", function (e) {
+        var d = e.target;
+        if (d.tagName === "DETAILS" && d.open) {
+          var card = d.closest(".task-card");
+          if (card && card.getAttribute("data-loaded") !== "1") loadNotes(card);
+        }
+      }, true);
+
+      try {
+        await load();
+      } catch (err) {
+        P.setAlert(alertBox, "error", P.errorMessage(err));
+      }
+    });
+  </script>
+</body>
+</html>

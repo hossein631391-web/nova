@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>درباره ما | انجمن نجوم NOVA</title>
+  <meta name="description" content="معرفی انجمن نجوم و فناوری‌های فضایی NOVA، اهداف، تاریخچه و نحوهٔ عضویت.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <header class="page-hero container reveal">
+        <h1 class="gradient-text">درباره ما</h1>
+        <p>انجمنی برای کسانی که هنوز از دیدن ستاره‌ها هیجان‌زده می‌شوند.</p>
+      </header>
+
+      <section class="section container two-col">
+        <div class="reveal">
+          <h2 class="section-title">معرفی انجمن</h2>
+          <p class="lead">انجمن نجوم و فناوری‌های فضایی NOVA جمعی غیرانتفاعی از علاقه‌مندان به نجوم، فیزیک فضا و فناوری‌های فضایی است. ما از مبتدی تا پژوهشگر را کنار هم جمع می‌کنیم تا آسمان را بهتر بشناسیم.</p>
+          <p>این متن نمونه است؛ معرفی واقعی انجمن را جایگزین کنید.</p>
+
+          <h2 class="section-title" style="margin-top:2.5rem">اهداف و ماموریت</h2>
+          <ul class="goal-list">
+            <li>آموزش نجوم و فیزیک فضا به زبان فارسی و به شکلی قابل فهم</li>
+            <li>برگزاری شب‌های رصد گروهی با تلسکوپ‌های انجمن</li>
+            <li>ترویج فناوری‌های فضایی و معرفی پژوهش‌های روز</li>
+            <li>ایجاد فضایی دوستانه برای گفتگو و تبادل تجربه میان اعضا</li>
+          </ul>
+        </div>
+
+        <aside class="card reveal" data-delay="1" id="membership">
+          <h2 class="section-title" style="font-size:1.35rem">عضویت در انجمن</h2>
+          <p>برای عضویت، فرم ثبت‌نام را پر کنید. هزینهٔ عضویت و شرایط دریافت کارت عضویت به‌زودی اعلام می‌شود.</p>
+          <p class="placeholder-note">(متن نمونه؛ فرم یا لینک ثبت‌نام واقعی را اینجا قرار دهید)</p>
+          <div class="card-actions">
+            <a class="btn" href="#">فرم عضویت</a>
+            <a class="btn btn-ghost" href="events.html">رویدادهای ما</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section container">
+        <h2 class="section-title reveal">تاریخچه و نقاط عطف</h2>
+        <ol class="timeline">
+          <li class="reveal"><span class="year">۱۴۰۲</span><p>تشکیل گروه اولیه با حدود ده عضو و نخستین شب رصد در دشت شمالی.</p></li>
+          <li class="reveal" data-delay="1"><span class="year">۱۴۰۳</span><p>راه‌اندازی دورهٔ آموزشی مقدماتی نجوم و برگزاری نخستین کارگاه تلسکوپ.</p></li>
+          <li class="reveal" data-delay="2"><span class="year">۱۴۰۴</span><p>خرید نخستین مجموعهٔ تلسکوپ‌های انجمن و ایجاد بخش رسانه و ویدیو.</p></li>
+          <li class="reveal" data-delay="3"><span class="year">۱۴۰۵</span><p>انتشار وب‌سایت رسمی و آغاز بخش مقالات و گالری آسمان.</p></li>
+        </ol>
+        <p class="placeholder-note">(تاریخ‌ها و متن‌های این بخش نمونه‌اند)</p>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      window.Nova.reveal(document);
+      // اگر با لینک #membership آمده باشند، به بخش عضویت برو
+      if (window.location.hash === "#membership") {
+        var el = document.getElementById("membership");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+  </script>
+</body>
+</html>

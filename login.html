@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ورود به پنل اعضا | انجمن نجوم NOVA</title>
+  <meta name="description" content="ورود اعضای انجمن نجوم NOVA به پنل شخصی.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <section class="panel container">
+        <div class="auth-card card reveal">
+          <h1 class="gradient-text" id="login-title">ورود به پنل اعضا</h1>
+          <p class="muted center" id="login-subtitle">با ایمیل و رمز عبور خود وارد شوید.</p>
+
+          <div id="login-alert" class="alert hidden" role="alert"></div>
+
+          <!-- فرم ورود -->
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="login-email">ایمیل</label>
+              <input class="input" id="login-email" name="email" type="email" dir="ltr" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="login-password">رمز عبور</label>
+              <input class="input" id="login-password" name="password" type="password" dir="ltr" autocomplete="current-password" required>
+            </div>
+            <button class="btn" type="submit" id="login-submit" style="width:100%">ورود</button>
+          </form>
+
+          <div class="auth-links" id="login-links">
+            <a href="#" id="show-reset">رمز عبور را فراموش کرده‌اید؟</a>
+            &nbsp;·&nbsp;
+            <a href="register.html">درخواست عضویت</a>
+          </div>
+
+          <!-- فرم درخواست لینک بازیابی -->
+          <form id="reset-form" class="hidden" novalidate style="margin-top:1.25rem">
+            <p class="help">لینک بازیابی رمز عبور به ایمیل شما ارسال می‌شود.</p>
+            <div class="field" style="margin-top:.75rem">
+              <label for="reset-email">ایمیل</label>
+              <input class="input" id="reset-email" type="email" dir="ltr" autocomplete="email" required>
+            </div>
+            <button class="btn btn-ghost" type="submit" style="width:100%">ارسال لینک بازیابی</button>
+            <div class="auth-links"><a href="#" id="hide-reset">بازگشت به ورود</a></div>
+          </form>
+
+          <!-- فرم تعیین رمز جدید (بعد از کلیک روی لینک ایمیل) -->
+          <form id="newpass-form" class="hidden" novalidate style="margin-top:1.25rem">
+            <p class="help">رمز تازه‌ای انتخاب کنید (حداقل ۸ کاراکتر).</p>
+            <div class="field" style="margin-top:.75rem">
+              <label for="new-password">رمز عبور جدید</label>
+              <input class="input" id="new-password" type="password" dir="ltr" minlength="8" autocomplete="new-password" required>
+            </div>
+            <button class="btn" type="submit" style="width:100%">ذخیرهٔ رمز جدید</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/panel.js" defer></script>
+  <script src="assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      var alertBox = document.getElementById("login-alert");
+      var loginForm = document.getElementById("login-form");
+      var resetForm = document.getElementById("reset-form");
+      var newpassForm = document.getElementById("newpass-form");
+      var submitBtn = document.getElementById("login-submit");
+      var params = new URLSearchParams(window.location.search);
+      var next = A.safeNext(params.get("next"));
+      // اگر کاربر با لینک بازیابی رمز آمده باشد، نباید خودکار به پنل برود
+      var isRecovery = window.location.hash.indexOf("type=recovery") !== -1;
+
+      function show(type, msg) { P.setAlert(alertBox, type, msg); }
+
+      function showPanel(which) {
+        loginForm.classList.toggle("hidden", which !== "login");
+        document.getElementById("login-links").classList.toggle("hidden", which !== "login");
+        resetForm.classList.toggle("hidden", which !== "reset");
+        newpassForm.classList.toggle("hidden", which !== "newpass");
+        document.getElementById("login-subtitle").classList.toggle("hidden", which === "newpass");
+        document.getElementById("login-title").textContent =
+          which === "newpass" ? "تعیین رمز عبور جدید" : which === "reset" ? "بازیابی رمز عبور" : "ورود به پنل اعضا";
+        show("", "");
+      }
+
+      if (!A.configured) {
+        show("error", "اتصال به Supabase تنظیم نشده است؛ فایل assets/js/config.js را کامل کنید.");
+        submitBtn.disabled = true;
+        return;
+      }
+
+      var client = A.client();
+
+      function goDashboard(state) {
+        var target = next || (state.profile.role === "admin" ? "admin/index.html" : "member/index.html");
+        window.location.replace(target);
+      }
+
+      // کاربری که از قبل وارد شده و تأیید شده، مستقیم به پنل برود
+      if (!isRecovery) {
+        A.getState().then(function (state) {
+          if (state.profile) goDashboard(state);
+        }).catch(function () {});
+      }
+
+      // رویداد بازیابی رمز از طرف Supabase
+      client.auth.onAuthStateChange(function (event) {
+        if (event === "PASSWORD_RECOVERY") showPanel("newpass");
+      });
+      if (isRecovery) showPanel("newpass");
+
+      /* ---- ورود ---- */
+      loginForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var email = document.getElementById("login-email").value.trim();
+        var password = document.getElementById("login-password").value;
+        if (!email || !password) { show("error", "ایمیل و رمز عبور را وارد کنید."); return; }
+        submitBtn.disabled = true;
+        show("", "");
+        try {
+          var state = await A.signIn(email, password);
+          show("success", "ورود موفق بود؛ در حال انتقال…");
+          goDashboard(state);
+        } catch (err) {
+          show("error", P.errorMessage(err));
+          submitBtn.disabled = false;
+        }
+      });
+
+      /* ---- نمایش فرم بازیابی ---- */
+      document.getElementById("show-reset").addEventListener("click", function (e) {
+        e.preventDefault();
+        document.getElementById("reset-email").value = document.getElementById("login-email").value.trim();
+        showPanel("reset");
+      });
+      document.getElementById("hide-reset").addEventListener("click", function (e) {
+        e.preventDefault();
+        showPanel("login");
+      });
+
+      /* ---- ارسال لینک بازیابی ---- */
+      resetForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var email = document.getElementById("reset-email").value.trim();
+        if (!email) { show("error", "ایمیل را وارد کنید."); return; }
+        try {
+          var res = await client.auth.resetPasswordForEmail(email, {
+            redirectTo: new URL("login.html", window.location.href).href
+          });
+          if (res.error) throw res.error;
+          // پیام یکسان برای جلوگیری از فاش شدن ثبت ایمیل‌ها
+          show("success", "اگر این ایمیل در سامانه ثبت شده باشد، لینک بازیابی برایتان ارسال می‌شود.");
+        } catch (err) {
+          show("error", P.errorMessage(err));
+        }
+      });
+
+      /* ---- تعیین رمز جدید ---- */
+      newpassForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var pw = document.getElementById("new-password").value;
+        if (pw.length < 8) { show("error", "رمز عبور حداقل باید ۸ کاراکتر باشد."); return; }
+        try {
+          var res = await client.auth.updateUser({ password: pw });
+          if (res.error) throw res.error;
+          await client.auth.signOut();
+          history.replaceState(null, "", window.location.pathname);
+          document.getElementById("new-password").value = "";
+          showPanel("login");
+          show("success", "رمز عبور شما تغییر کرد؛ اکنون با رمز جدید وارد شوید.");
+        } catch (err) {
+          show("error", P.errorMessage(err));
+        }
+      });
+    });
+  </script>
+</body>
+</html>

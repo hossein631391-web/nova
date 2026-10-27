@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مدیریت اعضا | NOVA</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page panel-loading">
+      <section class="panel container">
+        <div class="panel-head">
+          <div>
+            <h1 class="gradient-text">مدیریت اعضا</h1>
+            <p class="muted">درخواست‌ها را تأیید کنید، اعضا را غیرفعال کنید یا نقش آن‌ها را تغییر دهید.</p>
+          </div>
+        </div>
+
+        <nav class="subnav" aria-label="بخش‌های پنل مدیریت">
+          <a href="index.html">داشبورد</a>
+          <a href="members.html" aria-current="page">اعضا</a>
+          <a href="tasks.html">تسک‌ها</a>
+        </nav>
+
+        <div id="page-alert" class="alert hidden" role="alert"></div>
+
+        <div class="toolbar">
+          <div class="field">
+            <label for="f-q">جستجو (نام یا شماره تماس)</label>
+            <input class="input" id="f-q" type="search" placeholder="مثلاً: علی یا ۰۹۱۲…" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="f-status">وضعیت</label>
+            <select class="select" id="f-status">
+              <option value="all">همه</option>
+              <option value="pending">در انتظار تأیید</option>
+              <option value="approved">تأییدشده</option>
+              <option value="disabled">غیرفعال</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-role">نقش</label>
+            <select class="select" id="f-role">
+              <option value="all">همه</option>
+              <option value="member">عضو</option>
+              <option value="active">عضو فعال</option>
+              <option value="admin">مدیر</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="help" id="count-line" style="margin-bottom:.75rem"></p>
+
+        <div class="table-wrap">
+          <table class="data-table" aria-label="فهرست اعضا">
+            <thead>
+              <tr>
+                <th scope="col">نام</th>
+                <th scope="col">شماره تماس</th>
+                <th scope="col">وضعیت</th>
+                <th scope="col">نقش</th>
+                <th scope="col">تاریخ درخواست</th>
+                <th scope="col">عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="members-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="../assets/js/config.js" defer></script>
+  <script src="../assets/js/stars.js" defer></script>
+  <script src="../assets/js/main.js" defer></script>
+  <script src="../assets/js/panel.js" defer></script>
+  <script src="../assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      var state = await A.guard("admin");
+      if (!state) return;
+
+      var client = A.client();
+      var myId = state.user.id;
+      var body = document.getElementById("members-body");
+      var alertBox = document.getElementById("page-alert");
+      var countLine = document.getElementById("count-line");
+      var qEl = document.getElementById("f-q");
+      var statusEl = document.getElementById("f-status");
+      var roleEl = document.getElementById("f-role");
+      var members = [];
+      var busy = false;
+
+      // وضعیت اولیه از آدرس (مثلاً members.html?status=pending)
+      var initialStatus = new URLSearchParams(window.location.search).get("status");
+      if (initialStatus && ["pending", "approved", "disabled"].indexOf(initialStatus) !== -1) {
+        statusEl.value = initialStatus;
+      }
+
+      async function load() {
+        var res = await client.from("profiles")
+          .select("id, full_name, phone, role, status, created_at")
+          .order("created_at", { ascending: false });
+        if (res.error) throw res.error;
+        members = res.data || [];
+        render();
+      }
+
+      function btn(action, id, label, cls) {
+        return '<button type="button" class="btn btn-sm ' + (cls || "") + '" data-action="' + action +
+          '" data-id="' + P.esc(id) + '">' + P.esc(label) + "</button>";
+      }
+
+      function actionsFor(m) {
+        var isAdmin = m.role === "admin";
+        var isSelf = m.id === myId;
+        var html = [];
+        if (m.status === "pending") html.push(btn("approve", m.id, "تأیید"));
+        if (m.status === "approved" && !isSelf) html.push(btn("disable", m.id, "غیرفعال‌سازی", "btn-danger"));
+        if (m.status === "disabled") html.push(btn("enable", m.id, "فعال‌سازی مجدد"));
+        if (!isAdmin && m.status !== "disabled") {
+          if (m.role === "member") html.push(btn("promote", m.id, "ارتقا به عضو فعال", "btn-ghost"));
+          else html.push(btn("demote", m.id, "تبدیل به عضو عادی", "btn-ghost"));
+        }
+        if (isAdmin) html.push('<span class="help">نقش مدیر فقط دستی تغییر می‌کند</span>');
+        if (!html.length) html.push('<span class="help">—</span>');
+        return html.join(" ");
+      }
+
+      function rowHtml(m) {
+        return "<tr>" +
+          '<td data-label="نام">' + P.esc(m.full_name || "بدون نام") + "</td>" +
+          '<td data-label="شماره تماس" dir="ltr">' + P.esc(m.phone || "—") + "</td>" +
+          '<td data-label="وضعیت">' + P.statusBadge(m.status) + "</td>" +
+          '<td data-label="نقش">' + P.roleBadge(m.role) + "</td>" +
+          '<td data-label="تاریخ درخواست">' + P.esc(P.fmtDate(m.created_at)) + "</td>" +
+          '<td class="actions-cell" data-label="عملیات"><div class="actions">' + actionsFor(m) + "</div></td>" +
+          "</tr>";
+      }
+
+      function render() {
+        var q = P.normalizeDigits(qEl.value.trim()).toLowerCase();
+        var st = statusEl.value, rl = roleEl.value;
+        var list = members.filter(function (m) {
+          if (st !== "all" && m.status !== st) return false;
+          if (rl !== "all" && m.role !== rl) return false;
+          if (!q) return true;
+          var name = String(m.full_name || "").toLowerCase();
+          var phone = P.normalizeDigits(m.phone || "").toLowerCase();
+          return name.indexOf(q) !== -1 || phone.indexOf(q) !== -1;
+        });
+        body.innerHTML = list.length ? list.map(rowHtml).join("")
+          : '<tr><td colspan="6" class="empty-row">موردی پیدا نشد.</td></tr>';
+        countLine.textContent = "نمایش " + P.toFa(list.length) + " از " + P.toFa(members.length) + " عضو";
+      }
+
+      // پیام‌های تأیید فارسی برای هر عملیات
+      var ACTIONS = {
+        approve: {
+          ask: function (n) { return "آیا «" + n + "» را تأیید می‌کنید؟ پس از تأیید، می‌تواند وارد پنل شود."; },
+          ok: "تأیید", danger: false,
+          run: function (id) { return client.rpc("admin_set_status", { target: id, new_status: "approved" }); },
+          done: "عضو تأیید شد."
+        },
+        disable: {
+          ask: function (n) { return "آیا «" + n + "» غیرفعال شود؟ دیگر نمی‌تواند وارد پنل شود."; },
+          ok: "غیرفعال کن", danger: true,
+          run: function (id) { return client.rpc("admin_set_status", { target: id, new_status: "disabled" }); },
+          done: "عضو غیرفعال شد."
+        },
+        enable: {
+          ask: function (n) { return "آیا دسترسی «" + n + "» دوباره فعال شود؟"; },
+          ok: "فعال کن", danger: false,
+          run: function (id) { return client.rpc("admin_set_status", { target: id, new_status: "approved" }); },
+          done: "دسترسی عضو دوباره فعال شد."
+        },
+        promote: {
+          ask: function (n) { return "نقش «" + n + "» به «عضو فعال» تغییر کند؟ دسترسی به تسک‌ها اضافه می‌شود."; },
+          ok: "تغییر نقش", danger: false,
+          run: function (id) { return client.rpc("admin_set_role", { target: id, new_role: "active" }); },
+          done: "نقش به عضو فعال تغییر کرد."
+        },
+        demote: {
+          ask: function (n) { return "نقش «" + n + "» به «عضو عادی» برگردد؟ دسترسی به تسک‌ها برداشته می‌شود."; },
+          ok: "تغییر نقش", danger: true,
+          run: function (id) { return client.rpc("admin_set_role", { target: id, new_role: "member" }); },
+          done: "نقش به عضو عادی تغییر کرد."
+        }
+      };
+
+      body.addEventListener("click", async function (e) {
+        var button = e.target.closest("button[data-action]");
+        if (!button || busy) return;
+        var action = ACTIONS[button.getAttribute("data-action")];
+        var id = button.getAttribute("data-id");
+        var member = members.find(function (m) { return m.id === id; });
+        if (!action || !member) return;
+
+        var ok = await P.confirmDialog(action.ask(member.full_name || "این عضو"), {
+          confirmText: action.ok, danger: action.danger
+        });
+        if (!ok) return;
+
+        busy = true;
+        button.disabled = true;
+        try {
+          var res = await action.run(id);
+          if (res.error) throw res.error;
+          P.toast(action.done, "success");
+          await load();
+        } catch (err) {
+          P.toast(P.errorMessage(err), "error");
+          button.disabled = false;
+        } finally {
+          busy = false;
+        }
+      });
+
+      qEl.addEventListener("input", render);
+      statusEl.addEventListener("change", render);
+      roleEl.addEventListener("change", render);
+
+      try {
+        await load();
+      } catch (err) {
+        P.setAlert(alertBox, "error", P.errorMessage(err));
+      }
+    });
+  </script>
+</body>
+</html>

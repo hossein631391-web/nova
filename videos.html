@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ویدیوهای انجمن | انجمن نجوم NOVA</title>
+  <meta name="description" content="سخنرانی‌ها، گزارش‌های رصد و آموزش‌های تصویری انجمن نجوم NOVA.">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page">
+      <header class="page-hero container reveal">
+        <h1 class="gradient-text">ویدیوهای انجمن</h1>
+        <p>سخنرانی، گزارش رصد و آموزش؛ هر چیزی که بتوانیم در قالب تصویر به اشتراک بگذاریم.</p>
+      </header>
+
+      <section class="section container">
+        <div class="chips" role="group" aria-label="فیلتر دسته‌بندی ویدیو" id="video-filters">
+          <button type="button" class="chip" data-cat="all" aria-pressed="true">همه</button>
+          <button type="button" class="chip" data-cat="lecture" aria-pressed="false">سخنرانی</button>
+          <button type="button" class="chip" data-cat="observation" aria-pressed="false">گزارش رصد</button>
+          <button type="button" class="chip" data-cat="tutorial" aria-pressed="false">آموزش</button>
+        </div>
+        <div id="videos-grid" class="grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/videos.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+      var catLabels = { lecture: "سخنرانی", observation: "گزارش رصد", tutorial: "آموزش" };
+      var videos = window.NOVA_VIDEOS || [];
+      var grid = document.getElementById("videos-grid");
+      var category = "all";
+
+      function isPlaceholder(id) {
+        return !id || /^REPLACE/i.test(id);
+      }
+
+      function render() {
+        var items = videos.filter(function (v) {
+          return category === "all" || v.category === category;
+        });
+
+        grid.innerHTML = items.length ? items.map(function (v, i) {
+          var frame = isPlaceholder(v.youtubeId)
+            ? '<div class="video-placeholder">جای‌نگهدار — شناسهٔ ویدیوی یوتیوب را در data/videos.js قرار دهید</div>'
+            : '<iframe src="https://www.youtube-nocookie.com/embed/' + N.escapeHtml(v.youtubeId) +
+              '" title="' + N.escapeHtml(v.title) + '" loading="lazy" allowfullscreen ' +
+              'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+
+          return '<article class="card video-card reveal" data-delay="' + (i % 3) + '">' +
+            '<div class="video-frame">' + frame + "</div>" +
+            '<div class="meta"><span class="tag">' + catLabels[v.category] + "</span><span>" + N.escapeHtml(v.duration) + "</span></div>" +
+            "<h3>" + N.escapeHtml(v.title) + "</h3>" +
+            "</article>";
+        }).join("") : '<p class="empty-state">ویدیویی در این دسته‌بندی نیست.</p>';
+
+        N.reveal(grid);
+      }
+
+      document.getElementById("video-filters").addEventListener("click", function (e) {
+        var btn = e.target.closest(".chip");
+        if (!btn) return;
+        category = btn.getAttribute("data-cat");
+        this.querySelectorAll(".chip").forEach(function (b) {
+          b.setAttribute("aria-pressed", String(b === btn));
+        });
+        render();
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>

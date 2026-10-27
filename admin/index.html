@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>داشبورد مدیریت | NOVA</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js");
+      try {
+        var t = localStorage.getItem("nova-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        r.setAttribute("data-theme", t);
+      } catch (e) { r.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/panel.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <div class="site-wrap">
+    <div id="site-header"></div>
+
+    <main id="main" class="page panel-loading">
+      <section class="panel container">
+        <div class="panel-head">
+          <div>
+            <h1 class="gradient-text">داشبورد مدیریت</h1>
+            <p class="muted">وضعیت کلی انجمن را یک‌جا ببینید.</p>
+          </div>
+        </div>
+
+        <nav class="subnav" aria-label="بخش‌های پنل مدیریت">
+          <a href="index.html" aria-current="page">داشبورد</a>
+          <a href="members.html">اعضا</a>
+          <a href="tasks.html">تسک‌ها</a>
+        </nav>
+
+        <div id="page-alert" class="alert hidden" role="alert"></div>
+
+        <div class="stats" id="stats">
+          <div class="card stat"><div class="stat-value">…</div><div class="stat-label">تعداد کل اعضا</div></div>
+          <div class="card stat"><div class="stat-value">…</div><div class="stat-label">در انتظار تأیید</div></div>
+          <div class="card stat"><div class="stat-value">…</div><div class="stat-label">اعضای فعال</div></div>
+          <div class="card stat"><div class="stat-value">…</div><div class="stat-label">تسک‌های باز</div></div>
+        </div>
+
+        <div class="card-grid">
+          <article class="card reveal">
+            <h2 class="section-title" style="font-size:1.2rem">درخواست‌های در انتظار</h2>
+            <ul id="pending-list" class="assignee-list"></ul>
+            <div class="card-actions"><a class="btn btn-ghost btn-sm" href="members.html?status=pending">مدیریت درخواست‌ها</a></div>
+          </article>
+          <article class="card reveal" data-delay="1">
+            <h2 class="section-title" style="font-size:1.2rem">میان‌برها</h2>
+            <div class="card-actions">
+              <a class="btn btn-sm" href="members.html">مدیریت اعضا</a>
+              <a class="btn btn-ghost btn-sm" href="tasks.html">مدیریت تسک‌ها</a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="../assets/js/config.js" defer></script>
+  <script src="../assets/js/stars.js" defer></script>
+  <script src="../assets/js/main.js" defer></script>
+  <script src="../assets/js/panel.js" defer></script>
+  <script src="../assets/js/auth.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      var A = window.NovaAuth, P = window.NovaPanel;
+      var state = await A.guard("admin");
+      if (!state) return;
+
+      var client = A.client();
+      var alertBox = document.getElementById("page-alert");
+      var statCards = document.querySelectorAll("#stats .stat-value");
+
+      try {
+        // آمار از طریق تابع امن سمت سرور؛ فقط برای مدیر جواب می‌دهد
+        var statsRes = await client.rpc("admin_dashboard_stats");
+        if (statsRes.error) throw statsRes.error;
+        var s = statsRes.data || {};
+        var values = [s.total_members, s.pending, s.active_members, s.open_tasks];
+        statCards.forEach(function (el, i) { el.textContent = P.toFa(values[i] || 0); });
+
+        var pendingRes = await client.from("profiles")
+          .select("id, full_name, created_at")
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (pendingRes.error) throw pendingRes.error;
+
+        var list = document.getElementById("pending-list");
+        list.innerHTML = (pendingRes.data || []).length
+          ? pendingRes.data.map(function (m) {
+              return '<li class="row"><span>' + P.esc(m.full_name || "بدون نام") + "</span>" +
+                '<span class="help">' + P.fmtDate(m.created_at) + "</span></li>";
+            }).join("")
+          : '<li class="help">درخواست در انتظاری وجود ندارد.</li>';
+      } catch (err) {
+        P.setAlert(alertBox, "error", P.errorMessage(err));
+      }
+    });
+  </script>
+</body>
+</html>
