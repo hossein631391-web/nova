@@ -58,4 +58,94 @@
       <!-- رویدادهای نزدیک -->
       <section class="section container" aria-labelledby="upcoming-title">
         <h2 id="upcoming-title" class="section-title reveal">رویدادهای نزدیک</h2>
-        <div
+        <div id="upcoming-events" class="grid"></div>
+        <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="events.html">همه رویدادها و رصدها</a></p>
+      </section>
+
+      <!-- آخرین مقالات -->
+      <section class="section container" aria-labelledby="latest-title">
+        <h2 id="latest-title" class="section-title reveal">آخرین مقالات و اخبار</h2>
+        <div id="latest-articles" class="grid"></div>
+        <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="news.html">همه اخبار و مقالات</a></p>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+  </div>
+
+  <!-- اسکریپت‌ها: این‌ها حتماً باید باشند تا ستاره‌ها و هدر بارگذاری شوند -->
+  <script src="assets/js/stars.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="data/events.js" defer></script>
+  <script src="data/articles.js" defer></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var N = window.Nova;
+
+      // تزریق دکمه عضویت به منوی همبرگری
+      function injectMobileJoinBtn() {
+        var navList = document.querySelector('.nav-list');
+        if (navList && !navList.querySelector('.nav-join')) {
+          var li = document.createElement('li');
+          li.className = 'nav-join';
+          li.innerHTML = '<a href="membership.html">عضویت در انجمن</a>';
+          navList.appendChild(li);
+        }
+      }
+      
+      // تاخیر کوچک برای اطمینان از اینکه main.js هدر را ساخته است
+      setTimeout(injectMobileJoinBtn, 200);
+
+      // بقیه کدهای رویدادها و مقالات
+      var safe = function (v) {
+        return (N && typeof N.escapeHtml === "function")
+          ? N.escapeHtml(String(v == null ? "" : v))
+          : String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      };
+
+      var isFuture = (N && typeof N.isFuture === "function")
+        ? N.isFuture
+        : function (d) { var t = Date.parse(d); return isNaN(t) ? false : t > Date.now(); };
+
+      var typeLabels = { workshop: "کارگاه", talk: "سخنرانی", observation: "رصد شبانه" };
+
+      var upcoming = (window.NOVA_EVENTS || [])
+        .filter(function (ev) { return isFuture(ev.date); })
+        .sort(function (a, b) { return a.date < b.date ? -1 : 1; })
+        .slice(0, 3);
+
+      var evBox = document.getElementById("upcoming-events");
+      if (evBox) {
+        evBox.innerHTML = upcoming.length ? upcoming.map(function (ev, i) {
+          return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+            '<span class="tag tag-future">' + safe(typeLabels[ev.type] || "") + "</span>" +
+            "<h3>" + safe(ev.title) + "</h3>" +
+            '<div class="meta"><span>' + safe(ev.jalali) + "</span></div>" +
+            "<p>" + safe(ev.description) + "</p>" +
+            '<div class="card-actions"><a class="btn btn-sm" href="' + safe(ev.link) + '">ثبت‌نام</a></div>' +
+            "</article>";
+        }).join("") : '<p class="empty-state">فعلاً رویداد آیندهٔ ثبت‌شده‌ای نیست.</p>';
+      }
+
+      var articles = (window.NOVA_ARTICLES || []).slice(0, 3);
+      var artBox = document.getElementById("latest-articles");
+      if (artBox) {
+        artBox.innerHTML = articles.map(function (a, i) {
+          return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+            '<div class="card-media"></div>' +
+            "<h3>" + safe(a.title) + "</h3>" +
+            '<div class="meta"><span>' + safe(a.author) + "</span><span>" + safe(a.date) + "</span></div>" +
+            "<p>" + safe(a.summary) + "</p>" +
+            '<div class="card-actions"><a class="btn btn-ghost btn-sm" href="news.html#' + safe(a.id) + '">ادامه مطلب</a></div>' +
+            "</article>";
+        }).join("");
+      }
+
+      if (N && typeof N.reveal === "function") {
+        N.reveal(document);
+      }
+    });
+  </script>
+</body>
+</html>
