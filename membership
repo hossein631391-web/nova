@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عضویت | انجمن نجوم NOVA</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050714; --panel:rgba(12,16,34,.8); --panel2:rgba(20,28,58,.9);
+    --text:#e8edff; --muted:#9aa9d4; --line:rgba(140,170,255,.15);
+    --cyan:#5ee7ff; --violet:#a78bfa; --gold:#fbbf24; --danger:#ff5b7f;
+    --grad:linear-gradient(135deg,#5ee7ff 0%,#a78bfa 50%,#f0abfc 100%);
+    --radius:18px; --font:'Vazirmatn',sans-serif; --display:'Orbitron',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:var(--font); background:var(--bg); color:var(--text);
+    min-height:100vh; line-height:1.8; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 15% 5%,rgba(94,231,255,.07),transparent 60%),
+      radial-gradient(ellipse 60% 50% at 85% 15%,rgba(167,139,250,.07),transparent 60%),
+      radial-gradient(ellipse 60% 60% at 50% 100%,rgba(240,171,252,.05),transparent 60%);
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
+  h1{
+    font-family:var(--display); font-size:clamp(1.8rem,4vw,2.6rem);
+    text-align:center; margin-bottom:8px; letter-spacing:.04em;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .sub{text-align:center;color:var(--muted);margin-bottom:36px}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+  .tab{
+    padding:10px 22px;border-radius:50px;border:1px solid var(--line);
+    background:var(--panel);color:var(--muted);cursor:pointer;
+    font-family:var(--font);font-size:.95rem;transition:.25s;
+  }
+  .tab.active{background:var(--grad);color:#050714;border-color:transparent;font-weight:700}
+  .tab:hover:not(.active){border-color:rgba(94,231,255,.4);color:var(--text)}
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:32px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 20px 60px rgba(0,0,0,.45);position:relative;overflow:hidden;
+  }
+  .panel::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);
+  }
+  .view{display:none;animation:fade .35s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .field input,.field textarea,.field select{
+    width:100%;padding:12px 16px;border-radius:12px;
+    border:1px solid var(--line);background:rgba(5,7,20,.6);
+    color:var(--text);font-family:var(--font);font-size:.95rem;
+    transition:.25s;outline:none;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    border-color:var(--cyan);box-shadow:0 0 0 3px rgba(94,231,255,.12)
+  }
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:600px){.row{grid-template-columns:1fr}}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:13px 30px;border-radius:50px;border:none;cursor:pointer;
+    font-family:var(--font);font-size:1rem;font-weight:700;
+    background:var(--grad);color:#050714;transition:.3s;width:100%;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(94,231,255,.35)}
+  .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--text)}
+  .btn.ghost:hover{background:rgba(94,231,255,.08);border-color:var(--cyan);box-shadow:none}
+  .btn.danger{background:linear-gradient(135deg,#ff5b7f,#c026d3)}
+  .btn.small{padding:8px 18px;font-size:.85rem;width:auto}
+  .msg{padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:.9rem;display:none}
+  .msg.show{display:block}
+  .msg.ok{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);color:#6ee7b7}
+  .msg.err{background:rgba(255,91,127,.12);border:1px solid rgba(255,91,127,.35);color:#ff9db4}
+  .msg.info{background:rgba(94,231,255,.1);border:1px solid rgba(94,231,255,.3);color:var(--cyan)}
+  .req-card{
+    background:var(--panel2);border:1px solid var(--line);border-radius:14px;
+    padding:18px;margin-bottom:14px;transition:.25s;
+  }
+  .req-card:hover{border-color:rgba(94,231,255,.35)}
+  .req-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .req-name{font-weight:700;font-size:1.05rem}
+  .req-mail{color:var(--muted);font-size:.85rem;direction:ltr;text-align:right;font-family:monospace}
+  .badge{padding:4px 12px;border-radius:50px;font-size:.75rem;font-weight:700;white-space:nowrap}
+  .badge.pending{background:rgba(251,191,36,.15);color:var(--gold);border:1px solid rgba(251,191,36,.35)}
+  .badge.approved{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.35)}
+  .badge.rejected{background:rgba(255,91,127,.15);color:#ff9db4;border:1px solid rgba(255,91,127,.35)}
+  .req-body{margin-top:10px;font-size:.9rem;color:var(--muted)}
+  .req-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .approve-form{
+    margin-top:14px;padding:16px;border-radius:12px;
+    background:rgba(94,231,255,.05);border:1px dashed rgba(94,231,255,.3);
+    display:none;
+  }
+  .approve-form.show{display:block}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:.95rem}
+  .section-title{
+    font-family:var(--display);font-size:1.15rem;margin-bottom:18px;
+    padding-right:14px;border-right:3px solid var(--cyan);letter-spacing:.03em;
+  }
+  .user-badge{
+    display:flex;align-items:center;gap:12px;padding:16px;
+    background:rgba(94,231,255,.06);border:1px solid rgba(94,231,255,.25);
+    border-radius:14px;margin-bottom:20px;
+  }
+  .avatar{
+    width:48px;height:48px;border-radius:50%;background:var(--grad);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#050714;font-family:var(--display);font-size:1.1rem;
+  }
+  .hint{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .logout{background:none;border:none;color:var(--danger);cursor:pointer;font-family:var(--font);font-size:.85rem;margin-right:auto}
+  .badge-class{
+    display:inline-block;padding:3px 12px;border-radius:50px;font-size:.8rem;
+    background:rgba(94,231,255,.12);color:var(--cyan);
+    border:1px solid rgba(94,231,255,.3);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>عضویت در NOVA</h1>
+  <p class="sub">فرم را پر کنید؛ پس از تأیید مدیران، با جیمیل و رمزی که تعیین می‌شود وارد شوید.</p>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="request">درخواست عضویت</button>
+    <button class="tab" data-tab="login">ورود اعضا</button>
+    <button class="tab" data-tab="admin">پنل رئیس‌ها</button>
+  </div>
+
+  <div class="panel">
+
+    <!-- ============ VIEW: درخواست عضویت ============ -->
+    <div class="view active" id="view-request">
+      <div class="msg" id="req-msg"></div>
+      <form id="form-request">
+        <div class="row">
+          <div class="field">
+            <label>نام و نام خانوادگی *</label>
+            <input type="text" name="fullname" required placeholder="مثلاً سارا احمدی">
+          </div>
+          <div class="field">
+            <label>جیمیل *</label>
+            <input type="email" name="email" required placeholder="you@gmail.com" dir="ltr" style="text-align:left">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>کلاس *</label>
+          <input type="text" name="classCode" required placeholder="مثلاً 903" dir="ltr" style="text-align:left">
+          <p class="hint">کد یا نام کلاس موردنظر خود را وارد کنید. مثال: 903</p>
+        </div>
+
+        <button class="btn" type="submit">ارسال درخواست عضویت</button>
+        <p class="hint">پس از بررسی توسط رئیس‌ها، جیمیل و رمز ورود برای شما تعیین می‌شود.</p>
+      </form>
+    </div>
+
+    <!-- ============ VIEW: ورود اعضا ============ -->
+    <div class="view" id="view-login">
+      <div class="msg" id="login-msg"></div>
+      <div id="login-form-box">
+        <form id="form-login">
+          <div class="field">
+            <label>جیمیل</label>
+            <input type="email" name="email" required placeholder="you@gmail.com" dir="ltr" style="text-align:left">
+          </div>
+          <div class="field">
+            <label>رمز عبور</label>
+            <input type="password" name="password" required placeholder="••••••••" dir="ltr" style="text-align:left">
+          </div>
+          <button class="btn" type="submit">ورود</button>
+        </form>
+        <p class="hint">فقط اعضایی که توسط رئیس‌ها تأیید شده‌اند می‌توانند وارد شوند.</p>
+      </div>
+      <div id="member-panel" style="display:none">
+        <div class="user-badge">
+          <div class="avatar" id="member-avatar">N</div>
+          <div>
+            <div style="font-weight:700" id="member-name">—</div>
+            <div style="font-size:.85rem;color:var(--muted);direction:ltr;text-align:right" id="member-email">—</div>
+          </div>
+          <button class="logout" id="btn-logout">خروج</button>
+        </div>
+        <div class="section-title">خوش آمدید به انجمن NOVA</div>
+        <p style="color:var(--muted);font-size:.95rem">شما با موفقیت وارد شدید. کلاس ثبت‌نامی شما:</p>
+        <div id="member-class" style="margin-top:12px"></div>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn small" href="events.html">رویدادهای انجمن</a>
+          <button class="btn small ghost" onclick="alert('به‌زودی: گالری و مقالات اعضا')">گالری آسمان</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW: پنل رئیس‌ها ============ -->
+    <div class="view" id="view-admin">
+      <div class="msg" id="admin-msg"></div>
+      <div id="admin-login-box">
+        <div class="field">
+          <label>رمز مدیریتی رئیس‌ها</label>
+          <input type="password" id="admin-pass" placeholder="رمز را وارد کنید" dir="ltr" style="text-align:left">
+        </div>
+        <button class="btn" id="btn-admin-login">ورود به پنل مدیریت</button>
+      </div>
+      <div id="admin-panel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin:0">درخواست‌های عضویت</div>
+          <button class="btn small ghost" id="btn-admin-logout">خروج از پنل</button>
+        </div>
+        <div id="req-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   NOVA Membership – Front-end demo
+   ============================================================ */
+
+const ADMIN_PASS = 'nova2025';
+const LS = {
+  members:  'nova_members',
+  requests: 'nova_requests',
+  session:  'nova_session'
+};
+
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const load = k => JSON.parse(localStorage.getItem(k) || '[]');
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+const esc  = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now  = () => Date.now();
+const fmtDate = t => new Date(t).toLocaleDateString('fa-IR');
+
+function msg(el, text, type='info'){
+  el.textContent = text;
+  el.className = 'msg show ' + type;
+  if(type === 'ok' || type === 'err'){
+    setTimeout(()=>{ el.classList.remove('show'); }, 5000);
+  }
+}
+
+/* ---------- Tabs ---------- */
+$$('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    $$('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    $$('.view').forEach(v=>v.classList.remove('active'));
+    $('#view-' + tab.dataset.tab).classList.add('active');
+    if(tab.dataset.tab === 'login') refreshMemberPanel();
+    if(tab.dataset.tab === 'admin') renderRequests();
+  });
+});
+
+/* ============================================================
+   1) درخواست عضویت
+   ============================================================ */
+$('#form-request').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const email = f.get('email').trim().toLowerCase();
+  const classCode = f.get('classCode').trim();
+  const reqMsg = $('#req-msg');
+
+  if(!classCode){
+    return msg(reqMsg, 'کد یا نام کلاس را وارد کنید.', 'err');
+  }
+
+  const members  = load(LS.members);
+  const requests = load(LS.requests);
+
+  if(members.some(m => m.email === email) || requests.some(r => r.email === email && r.status === 'pending')){
+    return msg(reqMsg, 'این جیمیل قبلاً ثبت‌نام کرده یا درخواستش در انتظار بررسی است.', 'err');
+  }
+
+  const req = {
+    id: 'req_' + now(),
+    fullname: f.get('fullname').trim(),
+    email,
+    classCode,
+    status: 'pending',
+    createdAt: now(),
+    approvedAt: null
+  };
+  requests.push(req);
+  save(LS.requests, requests);
+
+  e.target.reset();
+  msg(reqMsg, '✅ درخواست شما ثبت شد. پس از تأیید رئیس‌ها، با جیمیل و رمزی که تعیین می‌شود وارد شوید.', 'ok');
+});
+
+/* ============================================================
+   2) ورود اعضا
+   ============================================================ */
+$('#form-login').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const email = f.get('email').trim().toLowerCase();
+  const pass  = f.get('password');
+  const loginMsg = $('#login-msg');
+
+  const member = load(LS.members).find(m => m.email === email && m.password === pass);
+  if(!member){
+    return msg(loginMsg, '❌ جیمیل یا رمز عبور اشتباه است، یا هنوز تأیید نشده‌اید.', 'err');
+  }
+
+  localStorage.setItem(LS.session, email);
+  refreshMemberPanel();
+  msg(loginMsg, '✅ خوش آمدید ' + member.fullname, 'ok');
+});
+
+function refreshMemberPanel(){
+  const email = localStorage.getItem(LS.session);
+  const member = email ? load(LS.members).find(m => m.email === email) : null;
+
+  if(member){
+    $('#login-form-box').style.display = 'none';
+    $('#member-panel').style.display   = 'block';
+    $('#member-name').textContent  = member.fullname;
+    $('#member-email').textContent = member.email;
+    $('#member-avatar').textContent = (member.fullname[0] || 'N').toUpperCase();
+
+    $('#member-class').innerHTML = member.classCode
+      ? `<span class="badge-class">کلاس ${esc(member.classCode)}</span>`
+      : '<span style="color:var(--muted);font-size:.9rem">کلاسی ثبت نشده.</span>';
+  }else{
+    $('#login-form-box').style.display = 'block';
+    $('#member-panel').style.display   = 'none';
+  }
+}
+$('#btn-logout').addEventListener('click', () => {
+  localStorage.removeItem(LS.session);
+  refreshMemberPanel();
+  $('#form-login').reset();
+  msg($('#login-msg'), 'از حساب خارج شدید.', 'info');
+});
+
+/* ============================================================
+   3) پنل رئیس‌ها
+   ============================================================ */
+$('#btn-admin-login').addEventListener('click', () => {
+  const val = $('#admin-pass').value;
+  const adminMsg = $('#admin-msg');
+  if(val === ADMIN_PASS){
+    $('#admin-login-box').style.display = 'none';
+    $('#admin-panel').style.display     = 'block';
+    renderRequests();
+    msg(adminMsg, '✅ وارد پنل رئیس‌ها شدید.', 'ok');
+  }else{
+    msg(adminMsg, '❌ رمز مدیریتی اشتباه است.', 'err');
+  }
+});
+$('#btn-admin-logout').addEventListener('click', () => {
+  $('#admin-panel').style.display     = 'none';
+  $('#admin-login-box').style.display = 'block';
+  $('#admin-pass').value = '';
+  $('#admin-msg').classList.remove('show');
+});
+
+function renderRequests(){
+  const list = $('#req-list');
+  const requests = load(LS.requests);
+  const members  = load(LS.members);
+
+  if(requests.length === 0 && members.length === 0){
+    list.innerHTML = '<div class="empty">هنوز هیچ درخواستی ثبت نشده است. 📭</div>';
+    return;
+  }
+
+  let html = '';
+
+  const pending = requests.filter(r => r.status === 'pending');
+  if(pending.length){
+    html += '<div class="section-title" style="margin-top:0">⏳ در انتظار تأیید (' + pending.length + ')</div>';
+    pending.forEach(r => { html += requestCard(r, 'pending'); });
+  }else{
+    html += '<div class="section-title">⏳ در انتظار تأیید</div><div class="empty" style="padding:20px">درخواست جدیدی نیست.</div>';
+  }
+
+  html += '<div class="section-title" style="margin-top:28px">✅ اعضای تأییدشده (' + members.length + ')</div>';
+  if(members.length){
+    members.forEach(m => {
+      html += `<div class="req-card">
+        <div class="req-head">
+          <div>
+            <div class="req-name">${esc(m.fullname)}</div>
+            <div class="req-mail">${esc(m.email)}</div>
+          </div>
+          <span class="badge approved">تأییدشده</span>
+        </div>
+        <div class="req-body">
+          کلاس: <span class="badge-class">${esc(m.classCode||'—')}</span>
+          • تاریخ تأیید: ${m.approvedAt?fmtDate(m.approvedAt):'—'}
+        </div>
+        <div class="req-actions">
+          <button class="btn small danger" onclick="removeMember('${esc(m.email)}')">حذف عضو</button>
+        </div>
+      </div>`;
+    });
+  }else{
+    html += '<div class="empty" style="padding:20px">هنوز عضوی تأیید نشده است.</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function requestCard(r, status){
+  const badge = status === 'pending'
+    ? '<span class="badge pending">در انتظار</span>'
+    : status === 'rejected'
+      ? '<span class="badge rejected">رد شده</span>'
+      : '<span class="badge approved">تأییدشده</span>';
+
+  let actions = '';
+  if(status === 'pending'){
+    actions = `
+      <div class="req-actions">
+        <button class="btn small" onclick="toggleApprove('${r.id}')">تأیید و تعیین رمز</button>
+        <button class="btn small danger" onclick="rejectRequest('${r.id}')">رد درخواست</button>
+      </div>
+      <div class="approve-form" id="af-${r.id}">
+        <div class="field">
+          <label>جیمیل عضو (قابل ویرایش)</label>
+          <input type="email" id="ap-email-${r.id}" value="${esc(r.email)}" dir="ltr" style="text-align:left">
+        </div>
+        <div class="field">
+          <label>رمز عبور موقت برای عضو</label>
+          <input type="text" id="ap-pass-${r.id}" placeholder="مثلاً Nova@1404" dir="ltr" style="text-align:left">
+        </div>
+        <div class="req-actions">
+          <button class="btn small" onclick="approveRequest('${r.id}')">ثبت تأیید و فعال‌سازی حساب</button>
+        </div>
+      </div>`;
+  }
+
+  return `<div class="req-card">
+    <div class="req-head">
+      <div>
+        <div class="req-name">${esc(r.fullname)}</div>
+        <div class="req-mail">${esc(r.email)}</div>
+      </div>
+      ${badge}
+    </div>
+    <div class="req-body">
+      کلاس: <span class="badge-class">${esc(r.classCode||'—')}</span>
+      • تاریخ درخواست: ${fmtDate(r.createdAt)}
+    </div>
+    ${actions}
+  </div>`;
+}
+
+function toggleApprove(id){
+  const el = document.getElementById('af-' + id);
+  if(el) el.classList.toggle('show');
+}
+
+function approveRequest(id){
+  const requests = load(LS.requests);
+  const members  = load(LS.members);
+  const idx = requests.findIndex(r => r.id === id);
+  if(idx === -1) return;
+
+  const email = document.getElementById('ap-email-' + id).value.trim().toLowerCase();
+  const pass  = document.getElementById('ap-pass-' + id).value.trim();
+
+  if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    return alert('جیمیل معتبر وارد کنید.');
+  }
+  if(pass.length < 6){
+    return alert('رمز باید حداقل ۶ کاراکتر باشد.');
+  }
+  if(members.some(m => m.email === email)){
+    return alert('این جیمیل قبلاً به‌عنوان عضو ثبت شده است.');
+  }
+
+  const r = requests[idx];
+  const member = {
+    fullname: r.fullname,
+    email,
+    password: pass,
+    classCode: r.classCode,
+    status: 'approved',
+    createdAt: r.createdAt,
+    approvedAt: now()
+  };
+  members.push(member);
+  requests.splice(idx, 1);
+
+  save(LS.members, members);
+  save(LS.requests, requests);
+
+  renderRequests();
+  msg($('#admin-msg'), '✅ حساب ' + member.fullname + ' فعال شد. جیمیل: ' + email + ' — رمز: ' + pass, 'ok');
+}
+
+function rejectRequest(id){
+  if(!confirm('این درخواست رد شود؟')) return;
+  const requests = load(LS.requests);
+  const idx = requests.findIndex(r => r.id === id);
+  if(idx === -1) return;
+  requests[idx].status = 'rejected';
+  save(LS.requests, requests);
+  renderRequests();
+  msg($('#admin-msg'), 'درخواست رد شد.', 'info');
+}
+
+function removeMember(email){
+  if(!confirm('این عضو حذف شود؟')) return;
+  const members = load(LS.members).filter(m => m.email !== email);
+  save(LS.members, members);
+  if(localStorage.getItem(LS.session) === email) localStorage.removeItem(LS.session);
+  renderRequests();
+  msg($('#admin-msg'), 'عضو حذف شد.', 'info');
+}
+
+/* ---------- Initial ---------- */
+refreshMemberPanel();
+renderRequests();
+</script>
+</body>
+</html>
