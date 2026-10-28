@@ -22,6 +22,55 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- استایل اصلاحی/محافظ برای دکمه‌های هیرو (خصوصاً در موبایل) -->
+  <style>
+    /* دکمه‌های هیرو همیشه دیده شوند، حتی اگر reveal اجرا نشود */
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .hero-actions .btn {
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: auto !important;
+    }
+    /* انیمیشن ورود سبک و مطمئن برای دکمه‌ها */
+    @keyframes heroBtnIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-actions .btn {
+      animation: heroBtnIn .5s ease-out both;
+    }
+    .hero-actions .btn:nth-child(1) { animation-delay: .10s; }
+    .hero-actions .btn:nth-child(2) { animation-delay: .20s; }
+
+    /* موبایل: دکمه‌ها تمام‌عرض و زیر هم */
+    @media (max-width: 600px) {
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+      }
+      .hero-actions .btn {
+        width: 100%;
+        text-align: center;
+        display: inline-flex;
+        justify-content: center;
+      }
+    }
+
+    /* اگر main.js لود نشد، محتوای reveal نامرئی نماند */
+    html.no-nova .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
@@ -48,7 +97,8 @@
           </svg>
           <h1 class="gradient-text reveal">انجمن نجوم و فناوری‌های فضایی NOVA</h1>
           <p class="slogan reveal" data-delay="1">ستاره‌ها را نگاه کنیم، پرسش‌ها را بپرسیم؛ هر شب، زیر آسمانی بی‌کران.</p>
-          <div class="hero-actions reveal" data-delay="2">
+          <!-- دکمه‌ها دیگر از reveal استفاده نمی‌کنند تا حتماً دیده شوند -->
+          <div class="hero-actions">
             <a class="btn btn-join" href="membership.html">عضویت در انجمن</a>
             <a class="btn btn-ghost" href="events.html">رویدادهای پیش رو</a>
           </div>
@@ -80,39 +130,72 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
+
+      // اگر main.js لود نشد، کلاس no-nova را اضافه کن تا .reveal نامرئی نماند
+      if (!N || typeof N.escapeHtml !== "function") {
+        document.documentElement.classList.add("no-nova");
+      }
+
+      var safe = function (v) {
+        return (N && typeof N.escapeHtml === "function")
+          ? N.escapeHtml(String(v == null ? "" : v))
+          : String(v == null ? "" : v)
+              .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+              .replace(/'/g, "&#39;");
+      };
+
+      var isFuture = (N && typeof N.isFuture === "function")
+        ? N.isFuture
+        : function (d) { var t = Date.parse(d); return isNaN(t) ? false : t > Date.now(); };
+
       var typeLabels = { workshop: "کارگاه", talk: "سخنرانی", observation: "رصد شبانه" };
 
       // سه رویداد آینده و نزدیک
       var upcoming = (window.NOVA_EVENTS || [])
-        .filter(function (ev) { return N.isFuture(ev.date); })
+        .filter(function (ev) { return isFuture(ev.date); })
         .sort(function (a, b) { return a.date < b.date ? -1 : 1; })
         .slice(0, 3);
 
       var evBox = document.getElementById("upcoming-events");
-      evBox.innerHTML = upcoming.length ? upcoming.map(function (ev, i) {
-        return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
-          '<span class="tag tag-future">' + typeLabels[ev.type] + "</span>" +
-          "<h3>" + N.escapeHtml(ev.title) + "</h3>" +
-          '<div class="meta"><span>' + N.escapeHtml(ev.jalali) + "</span></div>" +
-          "<p>" + N.escapeHtml(ev.description) + "</p>" +
-          '<div class="card-actions"><a class="btn btn-sm" href="' + N.escapeHtml(ev.link) + '">ثبت‌نام</a></div>' +
-          "</article>";
-      }).join("") : '<p class="empty-state">فعلاً رویداد آیندهٔ ثبت‌شده‌ای نیست.</p>';
+      if (evBox) {
+        evBox.innerHTML = upcoming.length ? upcoming.map(function (ev, i) {
+          return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+            '<span class="tag tag-future">' + safe(typeLabels[ev.type] || "") + "</span>" +
+            "<h3>" + safe(ev.title) + "</h3>" +
+            '<div class="meta"><span>' + safe(ev.jalali) + "</span></div>" +
+            "<p>" + safe(ev.description) + "</p>" +
+            '<div class="card-actions"><a class="btn btn-sm" href="' + safe(ev.link) + '">ثبت‌نام</a></div>' +
+            "</article>";
+        }).join("") : '<p class="empty-state">فعلاً رویداد آیندهٔ ثبت‌شده‌ای نیست.</p>';
+      }
 
       // سه مقالهٔ آخر
       var articles = (window.NOVA_ARTICLES || []).slice(0, 3);
       var artBox = document.getElementById("latest-articles");
-      artBox.innerHTML = articles.map(function (a, i) {
-        return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
-          '<div class="card-media"></div>' +
-          "<h3>" + N.escapeHtml(a.title) + "</h3>" +
-          '<div class="meta"><span>' + N.escapeHtml(a.author) + "</span><span>" + N.escapeHtml(a.date) + "</span></div>" +
-          "<p>" + N.escapeHtml(a.summary) + "</p>" +
-          '<div class="card-actions"><a class="btn btn-ghost btn-sm" href="news.html#' + N.escapeHtml(a.id) + '">ادامه مطلب</a></div>' +
-          "</article>";
-      }).join("");
+      if (artBox) {
+        artBox.innerHTML = articles.map(function (a, i) {
+          return '<article class="card reveal" data-delay="' + (i % 3) + '">' +
+            '<div class="card-media"></div>' +
+            "<h3>" + safe(a.title) + "</h3>" +
+            '<div class="meta"><span>' + safe(a.author) + "</span><span>" + safe(a.date) + "</span></div>" +
+            "<p>" + safe(a.summary) + "</p>" +
+            '<div class="card-actions"><a class="btn btn-ghost btn-sm" href="news.html#' + safe(a.id) + '">ادامه مطلب</a></div>' +
+            "</article>";
+        }).join("");
+      }
 
-      N.reveal(document);
+      if (N && typeof N.reveal === "function") {
+        N.reveal(document);
+      } else {
+        // بدون main.js: همهٔ عناصر reveal را نمایان کن
+        var nodes = document.querySelectorAll(".reveal");
+        for (var k = 0; k < nodes.length; k++) {
+          nodes[k].classList.add("visible");
+          nodes[k].style.opacity = "1";
+          nodes[k].style.transform = "none";
+        }
+      }
     });
   </script>
 </body>
