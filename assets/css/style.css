@@ -676,18 +676,51 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
     box-shadow: var(--shadow);
     margin: 0;
     display: none;
+    z-index: 60;
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
   }
   .main-nav.open { display: block; animation: fade-in .3s ease; }
-  .nav-list { flex-direction: column; align-items: stretch; padding: .75rem; gap: .25rem; }
-  .nav-list a { padding: .75rem 1rem; font-size: 1rem; }
+  
+  .nav-list { 
+    flex-direction: column; 
+    align-items: stretch; 
+    padding: .75rem; 
+    gap: .25rem; 
+  }
+  .nav-list li { width: 100%; }
+  .nav-list a { 
+    padding: .75rem 1rem; 
+    font-size: 1rem; 
+    text-align: start;
+    width: 100%;
+  }
   .nav-list a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--accent-3); }
   .header-inner { position: relative; }
-  .btn-join { display: none; }
+  
+  /* --- تغییرات اعمال شده: دکمه عضویت در منوی همبرگری --- */
+  .nav-join { display: block !important; margin-top: 0.5rem; }
+  .nav-join a {
+    background: var(--grad);
+    color: var(--on-accent) !important;
+    text-align: center !important;
+    font-weight: 800;
+    border-radius: 999px;
+    box-shadow: var(--glow);
+  }
+  .nav-join a:hover {
+    filter: brightness(1.1);
+  }
+  /* ----------------------------------------------- */
+
   .two-col { grid-template-columns: 1fr; }
 }
 
 @media (min-width: 900px) {
   .two-col { grid-template-columns: 1.2fr 1fr; align-items: start; }
+  
+  /* در دسکتاپ آیتم عضویت داخل منو را مخفی می‌کنیم (چون دکمه اصلی در هدر هست) */
+  .nav-join { display: none !important; }
 }
 
 /* ---------- حرکت کم (prefers-reduced-motion) ---------- */
