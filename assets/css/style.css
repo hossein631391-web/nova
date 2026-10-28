@@ -1,7 +1,5 @@
 /* ==========================================================================
    انجمن نجوم و فناوری‌های فضایی NOVA — استایل مشترک
-   همه رنگ‌ها فقط با متغیرهای CSS تعریف شده‌اند.
-   تم تاریک پیش‌فرض است؛ با data-theme="light" تم روشن فعال می‌شود.
    ========================================================================== */
 
 /* ---------- متغیرهای تم ---------- */
@@ -73,7 +71,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ابرهای کیهانی رنگی پشت صفحه */
 body::before {
   content: "";
   position: fixed;
@@ -87,7 +84,6 @@ body::before {
   filter: blur(20px);
 }
 
-/* بوم ستاره‌ها (توسط stars.js ساخته می‌شود) */
 #stars-canvas {
   position: fixed;
   inset: 0;
@@ -230,7 +226,7 @@ main.page {
   box-shadow: inset 0 -2px 0 var(--accent-3);
 }
 
-/* آیتم عضویت در منوی همبرگری: در دسکتاپ پنهان می‌شود */
+/* آیتم عضویت در منو: در دسکتاپ پنهان می‌شود */
 .nav-list .nav-join { display: none; }
 
 .header-actions { display: flex; align-items: center; gap: .6rem; }
@@ -339,7 +335,7 @@ main.page {
   50%      { transform: translateY(-10px) rotate(4deg); }
 }
 
-/* ---------- صفحه داخلی (عنوان صفحه) ---------- */
+/* ---------- صفحه داخلی ---------- */
 .page-hero {
   padding: 3.5rem 0 1.5rem;
   text-align: center;
@@ -419,12 +415,7 @@ main.page {
 .empty-state { color: var(--text-muted); text-align: center; padding: 2rem; grid-column: 1 / -1; }
 
 /* ---------- خط زمانی ---------- */
-.timeline {
-  position: relative;
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 0;
-}
+.timeline { position: relative; list-style: none; margin: 0; padding: 0; }
 .timeline::before {
   content: "";
   position: absolute;
@@ -434,11 +425,7 @@ main.page {
   background: linear-gradient(to bottom, var(--accent), var(--accent-3));
   box-shadow: var(--glow);
 }
-.timeline li {
-  position: relative;
-  padding-inline-start: 3rem;
-  padding-bottom: 2rem;
-}
+.timeline li { position: relative; padding-inline-start: 3rem; padding-bottom: 2rem; }
 .timeline li::before {
   content: "";
   position: absolute;
@@ -507,11 +494,7 @@ main.page {
   backdrop-filter: blur(6px);
 }
 .lightbox.open { display: flex; animation: fade-in .3s ease; }
-.lightbox-figure {
-  max-width: min(960px, 100%);
-  margin: 0;
-  text-align: center;
-}
+.lightbox-figure { max-width: min(960px, 100%); margin: 0; text-align: center; }
 .lightbox-media {
   aspect-ratio: 4 / 3;
   max-height: 75vh;
@@ -647,12 +630,9 @@ main.page {
   font-size: .85rem;
   text-align: center;
 }
-.placeholder-note {
-  font-size: .78rem;
-  color: var(--accent-3);
-}
+.placeholder-note { font-size: .78rem; color: var(--accent-3); }
 
-/* ---------- انیمیشن ورود (Scroll Reveal) ---------- */
+/* ---------- انیمیشن ورود ---------- */
 html.js .reveal {
   opacity: 0;
   transform: translateY(26px);
@@ -665,9 +645,38 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
 
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* ---------- واکنش‌گرا ---------- */
+/* ============================================================
+   واکنش‌گرا (موبایل و لپ‌تاپ) - اصلاح شده برای تمام صفحه و منوی وسط
+   ============================================================ */
 @media (max-width: 900px) {
-  .menu-toggle { display: inline-flex; }
+  /* تمام صفحه شدن کانتینر در موبایل */
+  .container {
+    width: 100% !important;
+    padding-inline: 1rem;
+  }
+
+  /* منوی همبرگری در مرکز */
+  .header-inner {
+    position: relative;
+    justify-content: center;
+  }
+  .logo {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .header-actions {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .menu-toggle {
+    display: inline-flex;
+    margin: 0 auto; /* وسط چین کردن آیکون همبرگری */
+  }
+
   .main-nav {
     position: absolute;
     top: 100%;
@@ -679,18 +688,24 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
     box-shadow: var(--shadow);
     margin: 0;
     display: none;
+    width: 100%;
   }
   .main-nav.open { display: block; animation: fade-in .3s ease; }
-  .nav-list { flex-direction: column; align-items: stretch; padding: .75rem; gap: .25rem; }
-  .nav-list a { padding: .75rem 1rem; font-size: 1rem; }
-  .nav-list a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--accent-3); }
-  .header-inner { position: relative; }
   
-  /* تغییر ۱: خط مخفی‌کننده دکمه عضویت در موبایل حذف شد تا در هدر هم دیده شود */
+  .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: .5rem;
+  }
+  .nav-list a {
+    padding: .85rem 1rem;
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+    border-radius: 12px;
+  }
   
-  .two-col { grid-template-columns: 1fr; }
-
-  /* تغییر ۲: استایل دادن به آیتم عضویت در منوی همبرگری موبایل */
   .nav-list .nav-join {
     display: block;
     margin-top: .5rem;
@@ -698,14 +713,35 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
   .nav-list .nav-join a {
     background: var(--grad);
     color: var(--on-accent);
-    text-align: center;
     font-weight: 800;
-    border-radius: 999px;
     box-shadow: var(--glow);
   }
-  .nav-list .nav-join a:hover {
-    filter: brightness(1.1);
-    color: var(--on-accent);
+
+  /* تمام صفحه شدن گریدها و کارت‌ها */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .card {
+    width: 100%;
+    padding: 1rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  /* تمام صفحه شدن فرم‌ها (مثل فرم عضویت) */
+  form {
+    width: 100%;
+    padding: 0;
+  }
+  input, textarea, select {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -713,7 +749,7 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
   .two-col { grid-template-columns: 1.2fr 1fr; align-items: start; }
 }
 
-/* ---------- حرکت کم (prefers-reduced-motion) ---------- */
+/* ---------- حرکت کم ---------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *,
