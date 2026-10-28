@@ -73,17 +73,15 @@
     <div id="site-footer"></div>
   </div>
 
-  <!-- اسکریپت‌ها: این‌ها حتماً باید باشند تا ستاره‌ها و هدر بارگذاری شوند -->
   <script src="assets/js/stars.js" defer></script>
   <script src="assets/js/main.js" defer></script>
   <script src="data/events.js" defer></script>
   <script src="data/articles.js" defer></script>
-  
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
 
-      // تزریق دکمه عضویت به منوی همبرگری
+      // ۱. اضافه کردن دکمه عضویت به منوی همبرگری (در صورت وجود منو)
       function injectMobileJoinBtn() {
         var navList = document.querySelector('.nav-list');
         if (navList && !navList.querySelector('.nav-join')) {
@@ -94,10 +92,10 @@
         }
       }
       
-      // تاخیر کوچک برای اطمینان از اینکه main.js هدر را ساخته است
-      setTimeout(injectMobileJoinBtn, 200);
+      // اجرای تزریق دکمه با کمی تاخیر تا main.js هدر را بسازد
+      setTimeout(injectMobileJoinBtn, 100);
 
-      // بقیه کدهای رویدادها و مقالات
+      // ۲. کدهای مربوط به رویدادها و مقالات
       var safe = function (v) {
         return (N && typeof N.escapeHtml === "function")
           ? N.escapeHtml(String(v == null ? "" : v))
