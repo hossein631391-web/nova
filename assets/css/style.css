@@ -229,7 +229,7 @@ main.page {
 
 .header-actions { display: flex; align-items: center; gap: .6rem; }
 
-/* دکمه عضویت هدر در همه حالت‌ها مخفی می‌شود */
+/* دکمه عضویت هدر مخفی شود */
 .header-actions .btn-join { display: none !important; }
 
 .theme-toggle,
@@ -653,80 +653,88 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ============================================================
-   واکنش‌گرا (موبایل) - تنظیمات دقیق برای آیکون منو
+   واکنش‌گرا (موبایل) - آیکون در گوشه، منو تمام صفحه
    ============================================================ */
 @media (max-width: 900px) {
-  /* ۱. تمام صفحه شدن کانتینرها */
+  /* ۱. تنظیمات کانتینر */
   .container {
     width: 100% !important;
     padding-inline: 1rem;
   }
 
-  /* ۲. هدر: چیدمان با position relative برای مرکز کردن آیکون */
+  /* ۲. آیکون سه‌خط در گوشه (کنار ماه/خورشید) */
   .header-inner {
     position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     min-height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  
-  .logo { margin: 0; }
-  .header-actions { margin: 0; }
 
-  /* ۳. آیکون سه‌خط دقیقاً وسط هدر و هم‌ردیف با دکمه تم */
+  /* منوی اصلی در حالت بسته مخفی است تا از چیدمان هدر خارج شود */
+  .main-nav {
+    display: none;
+  }
+
+  /* دکمه‌های سمت چپ (تم و منو) در کنار هم */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin: 0;
+  }
+
   .menu-toggle {
     display: inline-flex;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%); /* مرکز دقیق */
     margin: 0;
-    z-index: 10;
   }
 
-  /* ۴. وقتی منو باز می‌شود (aria-expanded=true)، آیکون دقیقاً سر جایش بماند و بزرگ نشود */
-  .menu-toggle[aria-expanded="true"] {
-    transform: translate(-50%, -50%) !important;
-    width: 42px;
-    height: 42px;
-  }
-
-  /* ۵. منوی بازشو */
-  .main-nav {
-    position: absolute;
-    top: 100%;
-    inset-inline: 0;
-    background: var(--surface-strong);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    margin: 0;
-    display: none;
-    width: 100%;
-  }
-  .main-nav.open { display: block; animation: fade-in .3s ease; }
-  
-  .nav-list {
+  /* ۳. منوی بازشو (تمام صفحه و وسط‌چین) */
+  .main-nav.open {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    padding: .75rem;
-    gap: .25rem;
+    justify-content: center;
+    align-items: center;
+    position: fixed; /* تمام صفحه */
+    inset: 0;
+    background: var(--surface-strong);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 100;
+    margin: 0;
+    padding: 2rem;
   }
+
+  .nav-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
   .nav-list a {
-    padding: .75rem 1rem;
-    font-size: 1rem;
+    font-size: 1.3rem;
+    padding: .8rem 1.5rem;
     width: 100%;
     text-align: center;
     border-radius: 12px;
+    background: transparent;
   }
-  
-  /* ۶. دکمه عضویت داخل منوی همبرگری */
+
+  .nav-list a:hover {
+    background: var(--surface);
+  }
+
+  /* ۴. دکمه عضویت داخل منوی همبرگری */
   .nav-list .nav-join {
     display: block;
-    margin-top: .5rem;
+    width: 100%;
+    margin-top: 1rem;
   }
+
   .nav-list .nav-join a {
     background: var(--grad);
     color: var(--on-accent);
@@ -734,18 +742,46 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
     font-weight: 800;
     border-radius: 999px;
     box-shadow: var(--glow);
+    font-size: 1.1rem;
+    padding: 1rem;
   }
+
   .nav-list .nav-join a:hover {
     filter: brightness(1.1);
     color: var(--on-accent);
   }
 
-  /* ۷. تمام صفحه شدن گریدها، کارت‌ها و فرم‌ها */
+  /* ۵. دکمه بستن (ضربدر) بالای صفحه */
+  .menu-close {
+    display: block;
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    color: var(--text);
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101;
+  }
+
+  .menu-close:hover {
+    box-shadow: var(--glow);
+    border-color: var(--accent);
+  }
+
+  /* ۶. تمام صفحه شدن گریدها و کارت‌ها */
   .grid { grid-template-columns: 1fr; gap: 1rem; }
   .card { width: 100%; padding: 1rem; }
   .hero-actions { width: 100%; padding: 0 1rem; }
   .hero-actions .btn { width: 100%; }
-  
+
   form, .form-card, .membership-form, fieldset {
     width: 100% !important;
     max-width: 100% !important;
@@ -753,6 +789,7 @@ html.js .reveal[data-delay="3"] { transition-delay: .36s; }
     margin-inline: 0 !important;
     box-sizing: border-box;
   }
+
   input, textarea, select {
     width: 100% !important;
     max-width: 100% !important;
