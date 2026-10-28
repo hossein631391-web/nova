@@ -13,6 +13,23 @@ a:hover { color: var(--accent-3); }
 h1, h2, h3, h4 { line-height: 1.4; margin: 0 0 .6em; font-weight: 800; }
 p { margin: 0 0 1em; }
 
+/* --- اصلاحیه: مخفی کردن لینک "رفتن به محتوای اصلی" در حالت عادی --- */
+.skip-link {
+  position: absolute;
+  inset-inline-start: 1rem;
+  top: -100px;
+  background: var(--surface-strong);
+  color: var(--text);
+  padding: .5rem 1rem;
+  border-radius: 10px;
+  z-index: 100;
+  transition: top 0.3s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+/* ------------------------------------------------------------- */
+
 /* ساختار */
 .site-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
 .container { width: min(1100px, 100% - 2.5rem); margin-inline: auto; }
@@ -42,7 +59,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .nav-list .nav-join { display: none; }
 
 .header-actions { display: flex; align-items: center; gap: .6rem; }
-.header-actions .btn-join { display: none !important; } /* حذف دکمه عضویت هدر */
+.header-actions .btn-join { display: none !important; }
 
 .theme-toggle, .menu-toggle { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: grid; place-items: center; cursor: pointer; transition: transform .3s, box-shadow .3s, border-color .3s; }
 .theme-toggle:hover, .menu-toggle:hover { transform: rotate(-12deg) scale(1.06); box-shadow: var(--glow); border-color: var(--accent); }
@@ -104,13 +121,28 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
   .container { width: 100% !important; padding-inline: 1rem; }
 
   /* هدر */
-  .header-inner { position: relative; min-height: 72px; display: flex; align-items: center; justify-content: space-between; }
-  .main-nav { display: none; }
-  .header-actions { display: flex; align-items: center; gap: .6rem; margin: 0; }
+  .header-inner { 
+    position: relative; 
+    min-height: 72px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+  }
   
-  /* آیکون سه‌خط در گوشه */
+  .main-nav { display: none; }
+  
+  /* انتقال دکمه‌ها (ماه/خورشید و منو) به سمت چپ در RTL */
+  .header-actions { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    margin: 0; 
+    order: -1; 
+  }
+  
+  /* آیکون سه‌خط */
   .menu-toggle { display: inline-flex; margin: 0; }
-
+  
   /* منوی بازشو: تمام صفحه */
   .main-nav.open {
     display: flex;
