@@ -2,7 +2,6 @@
    انجمن نجوم و فناوری‌های فضایی NOVA — استایل مشترک
    ========================================================================== */
 
-/* ---------- متغیرهای تم ---------- */
 :root {
   --bg: #070b1f;
   --bg-2: #14123a;
@@ -121,7 +120,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
   border-bottom: 1px solid transparent; transition: background .4s, box-shadow .4s, border-color .4s;
 }
 .site-header.is-scrolled { border-bottom-color: var(--border); box-shadow: var(--shadow); background: color-mix(in srgb, var(--header-bg) 92%, transparent); }
-.header-inner { display: flex; align-items: center; gap: 1rem; min-height: 72px; transition: min-height .4s; }
+.header-inner { display: flex; align-items: center; gap: 1rem; min-height: 72px; transition: min-height .4s; position: relative; }
 .site-header.is-scrolled .header-inner { min-height: 60px; }
 
 .logo { display: inline-flex; align-items: center; gap: .6rem; color: var(--text); font-weight: 800; white-space: nowrap; }
@@ -137,9 +136,10 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .nav-list a:hover { color: var(--text); background: var(--surface); }
 .nav-list a[aria-current="page"] { color: var(--text); background: var(--surface-strong); box-shadow: inset 0 -2px 0 var(--accent-3); }
 
-.nav-list .nav-join { display: none; } /* در دسکتاپ مخفی */
+.nav-list .nav-join { display: none; }
 
 .header-actions { display: flex; align-items: center; gap: .6rem; }
+
 .theme-toggle, .menu-toggle { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: grid; place-items: center; cursor: pointer; transition: transform .3s, box-shadow .3s, border-color .3s; }
 .theme-toggle:hover, .menu-toggle:hover { transform: rotate(-12deg) scale(1.06); box-shadow: var(--glow); border-color: var(--accent); }
 .theme-toggle svg { width: 20px; height: 20px; }
@@ -269,94 +269,4 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .socials a { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: box-shadow .3s, transform .3s; }
 .socials a:hover { box-shadow: var(--glow); transform: translateY(-3px); color: var(--text); }
 .socials svg { width: 18px; height: 18px; }
-.footer-bottom { margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed var(--border); color: var(--text-muted); font-size: .85rem; text-align: center; }
-.placeholder-note { font-size: .78rem; color: var(--accent-3); }
-
-/* ---------- انیمیشن ---------- */
-html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
-html.js .reveal.is-visible { opacity: 1; transform: none; }
-html.js .reveal[data-delay="1"] { transition-delay: .12s; }
-html.js .reveal[data-delay="2"] { transition-delay: .24s; }
-html.js .reveal[data-delay="3"] { transition-delay: .36s; }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-
-/* ============================================================
-   واکنش‌گرا (موبایل) — آیکون وسط، عضویت فقط در منو
-   ============================================================ */
-@media (max-width: 900px) {
-  /* در گوشی دکمه عضویت هدر مخفی می‌شود تا فقط در منو باشد */
-  .header-actions .btn-join { display: none !important; }
-
-  /* چیدمان هدر در گوشی برای وسط‌چین شدن دقیق آیکون منو */
-  .header-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 72px;
-  }
-
-  /* لوگو سمت راست */
-  .logo {
-    position: static;
-    margin: 0;
-  }
-
-  /* آیکون منو دقیقاً در وسط: از فضای خالی بین لوگو و دکمه‌ها استفاده می‌کند */
-  .menu-toggle {
-    display: inline-flex;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-  }
-
-  /* دکمه‌های سمت چپ */
-  .header-actions {
-    position: static;
-    margin: 0;
-    margin-inline-start: auto;
-  }
-
-  /* منوی بازشو */
-  .main-nav {
-    position: absolute; top: 100%; inset-inline: 0;
-    background: var(--surface-strong); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border); box-shadow: var(--shadow);
-    margin: 0; display: none;
-  }
-  .main-nav.open { display: block; animation: fade-in .3s ease; }
-  .nav-list { flex-direction: column; align-items: stretch; padding: .75rem; gap: .25rem; }
-  .nav-list a { padding: .75rem 1rem; font-size: 1rem; }
-  .nav-list a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--accent-3); }
-  
-  /* استایل دادن به آیتم عضویت در منوی همبرگری */
-  .nav-list .nav-join { display: block; margin-top: .5rem; }
-  .nav-list .nav-join a {
-    background: var(--grad);
-    color: var(--on-accent);
-    text-align: center;
-    font-weight: 800;
-    border-radius: 999px;
-    box-shadow: var(--glow);
-  }
-  .nav-list .nav-join a:hover { filter: brightness(1.1); color: var(--on-accent); }
-
-  /* تمام صفحه شدن گریدها و کارت‌ها */
-  .grid { grid-template-columns: 1fr; gap: 1rem; }
-  .card { width: 100%; padding: 1rem; }
-  .hero-actions { flex-direction: column; gap: 10px; }
-  .hero-actions .btn { width: 100%; }
-  
-  .two-col { grid-template-columns: 1fr; }
-}
-
-@media (min-width: 900px) {
-  .two-col { grid-template-columns: 1.2fr 1fr; align-items: start; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
-  html.js .reveal { opacity: 1; transform: none; }
-}
+.footer-bottom { margin-top: 2rem; padding-top: 1rem; border-top: 1
