@@ -27,13 +27,14 @@
   <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
   <div class="site-wrap">
     <div id="site-header"></div>
+
     <main id="main" class="page">
       <section class="hero container">
         <div>
-          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true">
+          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
             <defs>
               <radialGradient id="hero-core" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#ffb3ec"/>
+                <stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#ffb3ec"/>
                 <stop offset="70%" stop-color="#7b4dff"/><stop offset="100%" stop-color="#3a6bff" stop-opacity="0"/>
               </radialGradient>
             </defs>
@@ -42,7 +43,7 @@
               <line x1="12" y1="12" x2="52" y2="52"/><line x1="52" y1="12" x2="12" y2="52"/>
             </g>
             <circle cx="32" cy="32" r="16" fill="url(#hero-core)"/>
-            <circle cx="32" cy="32" r="6" fill="#fff"/>
+            <circle cx="32" cy="32" r="6" fill="#ffffff"/>
           </svg>
           <h1 class="gradient-text reveal">انجمن نجوم و فناوری‌های فضایی NOVA</h1>
           <p class="slogan reveal" data-delay="1">ستاره‌ها را نگاه کنیم، پرسش‌ها را بپرسیم؛ هر شب، زیر آسمانی بی‌کران.</p>
@@ -53,18 +54,19 @@
         </div>
       </section>
 
-      <section class="section container">
-        <h2 class="section-title reveal">رویدادهای نزدیک</h2>
+      <section class="section container" aria-labelledby="upcoming-title">
+        <h2 id="upcoming-title" class="section-title reveal">رویدادهای نزدیک</h2>
         <div id="upcoming-events" class="grid"></div>
         <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="events.html">همه رویدادها و رصدها</a></p>
       </section>
 
-      <section class="section container">
-        <h2 class="section-title reveal">آخرین مقالات و اخبار</h2>
+      <section class="section container" aria-labelledby="latest-title">
+        <h2 id="latest-title" class="section-title reveal">آخرین مقالات و اخبار</h2>
         <div id="latest-articles" class="grid"></div>
         <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="news.html">همه اخبار و مقالات</a></p>
       </section>
     </main>
+
     <div id="site-footer"></div>
   </div>
 
@@ -75,8 +77,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
-      
-      // تزریق عضویت به منو
+
       function injectMobileJoinBtn() {
         var navList = document.querySelector('.nav-list');
         if (navList && !navList.querySelector('.nav-join')) {
@@ -89,8 +90,9 @@
       setTimeout(injectMobileJoinBtn, 150);
 
       var safe = function (v) {
-        return (N && typeof N.escapeHtml === "function") ? N.escapeHtml(String(v||"")) : String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        return (N && typeof N.escapeHtml === "function") ? N.escapeHtml(String(v == null ? "" : v)) : String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       };
+
       var isFuture = (N && typeof N.isFuture === "function") ? N.isFuture : function (d) { var t = Date.parse(d); return isNaN(t) ? false : t > Date.now(); };
       var typeLabels = { workshop: "کارگاه", talk: "سخنرانی", observation: "رصد شبانه" };
 
@@ -98,15 +100,15 @@
       var evBox = document.getElementById("upcoming-events");
       if (evBox) {
         evBox.innerHTML = upcoming.length ? upcoming.map(function (ev, i) {
-          return '<article class="card reveal"><span class="tag tag-future">' + safe(typeLabels[ev.type] || "") + '</span><h3>' + safe(ev.title) + '</h3><div class="meta"><span>' + safe(ev.jalali) + '</span></div><p>' + safe(ev.description) + '</p><div class="card-actions"><a class="btn btn-sm" href="' + safe(ev.link) + '">ثبت‌نام</a></div></article>';
-        }).join("") : '<p class="empty-state">رویدادی ثبت نشده است.</p>';
+          return '<article class="card reveal" data-delay="' + (i % 3) + '"><span class="tag tag-future">' + safe(typeLabels[ev.type] || "") + "</span><h3>" + safe(ev.title) + '</h3><div class="meta"><span>' + safe(ev.jalali) + "</span></div><p>" + safe(ev.description) + '</p><div class="card-actions"><a class="btn btn-sm" href="' + safe(ev.link) + '">ثبت‌نام</a></div></article>';
+        }).join("") : '<p class="empty-state">فعلاً رویداد آیندهٔ ثبت‌شده‌ای نیست.</p>';
       }
 
       var articles = (window.NOVA_ARTICLES || []).slice(0, 3);
       var artBox = document.getElementById("latest-articles");
       if (artBox) {
-        artBox.innerHTML = articles.map(function (a) {
-          return '<article class="card reveal"><div class="card-media"></div><h3>' + safe(a.title) + '</h3><div class="meta"><span>' + safe(a.author) + '</span><span>' + safe(a.date) + '</span></div><p>' + safe(a.summary) + '</p><div class="card-actions"><a class="btn btn-ghost btn-sm" href="news.html#' + safe(a.id) + '">ادامه</a></div></article>';
+        artBox.innerHTML = articles.map(function (a, i) {
+          return '<article class="card reveal" data-delay="' + (i % 3) + '"><div class="card-media"></div><h3>' + safe(a.title) + '</h3><div class="meta"><span>' + safe(a.author) + "</span><span>" + safe(a.date) + "</span></div><p>" + safe(a.summary) + '</p><div class="card-actions"><a class="btn btn-ghost btn-sm" href="news.html#' + safe(a.id) + '">ادامه مطلب</a></div></article>';
         }).join("");
       }
 
