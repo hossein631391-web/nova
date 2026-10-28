@@ -114,24 +114,31 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     min-height: 72px; 
     display: flex; 
     align-items: center; 
-    justify-content: space-between; 
   }
   
-  /* چیدمان آیکون‌ها: لوگو راست، دکمه‌ها چپ */
-  .logo { margin: 0; order: 2; }
+  /* لوگو راست */
+  .logo { 
+    margin: 0; 
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
   
-  /* منوی اصلی در هدر مخفی شود */
-  .main-nav:not(.open) { display: none; }
-
-  /* دکمه‌ها به سمت چپ هدر (در RTL) */
+  /* دکمه‌ها (منو و ماه/خورشید) به سمت چپ */
   .header-actions { 
     display: flex; 
     align-items: center; 
     gap: 0.5rem; 
     margin: 0; 
-    order: 1; 
-    margin-inline-end: auto; /* هل دادن به سمت چپ */
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
   }
+  
+  /* منوی اصلی در هدر مخفی شود */
+  .main-nav:not(.open) { display: none; }
   
   /* دکمه منوی سه‌خط */
   .menu-toggle { 
