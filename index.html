@@ -49,7 +49,7 @@
           <h1 class="gradient-text reveal">انجمن نجوم و فناوری‌های فضایی NOVA</h1>
           <p class="slogan reveal" data-delay="1">ستاره‌ها را نگاه کنیم، پرسش‌ها را بپرسیم؛ هر شب، زیر آسمانی بی‌کران.</p>
           <div class="hero-actions reveal" data-delay="2">
-            <a class="btn btn-join" href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>
+            <!-- دکمه عضویت از اینجا حذف شد -->
             <a class="btn btn-ghost" href="events.html">رویدادهای پیش رو</a>
           </div>
         </div>
@@ -81,13 +81,12 @@
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
 
-      // ۱. اضافه کردن دکمه عضویت به منوی همبرگری
+      // تزریق دکمه عضویت به منوی همبرگری با لینک کامل
       function injectMobileJoinBtn() {
         var navList = document.querySelector('.nav-list');
         if (navList && !navList.querySelector('.nav-join')) {
           var li = document.createElement('li');
           li.className = 'nav-join';
-          // لینک کامل عضویت که خواسته بودید
           li.innerHTML = '<a href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>';
           navList.appendChild(li);
         }
@@ -95,7 +94,6 @@
       
       setTimeout(injectMobileJoinBtn, 100);
 
-      // ۲. کدهای مربوط به رویدادها و مقالات
       var safe = function (v) {
         return (N && typeof N.escapeHtml === "function")
           ? N.escapeHtml(String(v == null ? "" : v))
