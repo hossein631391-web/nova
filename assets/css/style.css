@@ -13,22 +13,10 @@ a:hover { color: var(--accent-3); }
 h1, h2, h3, h4 { line-height: 1.4; margin: 0 0 .6em; font-weight: 800; }
 p { margin: 0 0 1em; }
 
-/* --- اصلاحیه: مخفی کردن لینک "رفتن به محتوای اصلی" در حالت عادی --- */
+/* --- مخفی کردن کامل لینک "رفتن به محتوای اصلی" --- */
 .skip-link {
-  position: absolute;
-  inset-inline-start: 1rem;
-  top: -100px;
-  background: var(--surface-strong);
-  color: var(--text);
-  padding: .5rem 1rem;
-  border-radius: 10px;
-  z-index: 100;
-  transition: top 0.3s;
+  display: none !important;
 }
-.skip-link:focus {
-  top: 1rem;
-}
-/* ------------------------------------------------------------- */
 
 /* ساختار */
 .site-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
@@ -129,19 +117,27 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     justify-content: space-between; 
   }
   
-  .main-nav { display: none; }
+  /* چیدمان آیکون‌ها: لوگو راست، دکمه‌ها چپ */
+  .logo { margin: 0; order: 2; }
   
-  /* انتقال دکمه‌ها (ماه/خورشید و منو) به سمت چپ در RTL */
+  /* منوی اصلی در هدر مخفی شود */
+  .main-nav:not(.open) { display: none; }
+
+  /* دکمه‌ها به سمت چپ هدر (در RTL) */
   .header-actions { 
     display: flex; 
     align-items: center; 
     gap: 0.5rem; 
     margin: 0; 
-    order: -1; 
+    order: 1; 
+    margin-inline-end: auto; /* هل دادن به سمت چپ */
   }
   
-  /* آیکون سه‌خط */
-  .menu-toggle { display: inline-flex; margin: 0; }
+  /* دکمه منوی سه‌خط */
+  .menu-toggle { 
+    display: inline-flex; 
+    margin: 0; 
+  }
   
   /* منوی بازشو: تمام صفحه */
   .main-nav.open {
