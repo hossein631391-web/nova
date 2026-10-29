@@ -14,9 +14,7 @@ h1, h2, h3, h4 { line-height: 1.4; margin: 0 0 .6em; font-weight: 800; }
 p { margin: 0 0 1em; }
 
 /* --- مخفی کردن کامل لینک "رفتن به محتوای اصلی" --- */
-.skip-link {
-  display: none !important;
-}
+.skip-link { display: none !important; }
 
 /* ساختار */
 .site-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
@@ -114,37 +112,43 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     min-height: 72px; 
     display: flex; 
     align-items: center; 
+    justify-content: center; /* برای اطمینان از چیدمان */
   }
   
-  /* لوگو راست */
+  /* لوگو و منو در سمت راست */
   .logo { 
-    margin: 0; 
     position: absolute;
     right: 1rem;
     top: 50%;
     transform: translateY(-50%);
+    margin: 0;
+    z-index: 2;
   }
   
-  /* دکمه‌ها (منو و ماه/خورشید) به سمت چپ */
+  /* دکمه‌ها: منو در سمت راست کنار لوگو، ماه در چپ */
   .header-actions { 
-    display: flex; 
-    align-items: center; 
-    gap: 0.5rem; 
-    margin: 0; 
     position: absolute;
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    z-index: 2;
+  }
+
+  /* منوی سه‌خط را به سمت راست (کنار لوگو) منتقل می‌کنیم */
+  .header-actions .menu-toggle {
+    position: absolute;
+    right: -35px; /* کنار لوگو */
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
   }
   
   /* منوی اصلی در هدر مخفی شود */
   .main-nav:not(.open) { display: none; }
-  
-  /* دکمه منوی سه‌خط */
-  .menu-toggle { 
-    display: inline-flex; 
-    margin: 0; 
-  }
   
   /* منوی بازشو: تمام صفحه */
   .main-nav.open {
