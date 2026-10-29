@@ -22,6 +22,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .section-title::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--grad); box-shadow: var(--glow); }
 .gradient-text { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
+/* ========== هدر ========== */
 .site-header { position: sticky; top: 0; z-index: 50; background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: background .4s, box-shadow .4s, border-color .4s; }
 .site-header.is-scrolled { border-bottom-color: var(--border); box-shadow: var(--shadow); background: color-mix(in srgb, var(--header-bg) 92%, transparent); }
 .header-inner { display: flex; align-items: center; gap: 1rem; min-height: 72px; transition: min-height .4s; position: relative; }
@@ -43,19 +44,17 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .header-actions { display: flex; align-items: center; gap: .6rem; }
 .header-actions .btn-join { display: none !important; }
 
-.theme-toggle, .menu-toggle { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .3s, box-shadow .3s, border-color .3s; padding: 0; }
-.theme-toggle:hover, .menu-toggle:hover { transform: rotate(-12deg) scale(1.06); box-shadow: var(--glow); border-color: var(--accent); }
-.theme-toggle svg { width: 20px; height: 20px; }
-.theme-toggle .icon-sun { display: none; }
-[data-theme="light"] .theme-toggle .icon-sun { display: block; }
-[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+/* دکمه منو (label) */
+.menu-toggle { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: none; align-items: center; justify-content: center; cursor: pointer; transition: transform .3s, box-shadow .3s, border-color .3s; padding: 0; flex-direction: column; gap: 5px; }
+.menu-toggle:hover { transform: rotate(-12deg) scale(1.06); box-shadow: var(--glow); border-color: var(--accent); }
+.menu-toggle span { display: block; width: 18px; height: 2px; background: currentColor; border-radius: 2px; transition: transform .3s, opacity .3s; margin: 0 auto; }
 
-.menu-toggle { display: none; flex-direction: column; gap: 5px; }
-.menu-toggle span { display: block; width: 20px; height: 2px; background: currentColor; border-radius: 2px; transition: transform .3s, opacity .3s; margin: 0 auto; }
-.menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-.menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+/* انیمیشن ضربدر وقتی منو باز است */
+.menu-checkbox:checked ~ .header-actions .menu-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-checkbox:checked ~ .header-actions .menu-toggle span:nth-child(2) { opacity: 0; }
+.menu-checkbox:checked ~ .header-actions .menu-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+/* دکمه‌ها */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .7rem 1.4rem; border-radius: 999px; border: 1px solid transparent; background: var(--grad); color: var(--on-accent); font: inherit; font-weight: 700; font-size: .95rem; cursor: pointer; box-shadow: var(--glow); transition: transform .3s ease, box-shadow .35s ease, filter .3s ease; white-space: nowrap; }
 .btn:hover { color: var(--on-accent); transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 0 26px rgba(167,123,255,.8), 0 0 60px rgba(255,111,208,.4); }
 .btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: none; }
@@ -64,6 +63,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .btn-join { animation: glow-pulse 3.2s ease-in-out infinite; }
 @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 12px rgba(167,123,255,.45); } 50% { box-shadow: 0 0 26px rgba(255,111,208,.65), 0 0 48px rgba(123,77,255,.35); } }
 
+/* هیرو */
 .hero { min-height: 78vh; display: grid; place-items: center; text-align: center; padding: 4rem 0 3rem; }
 .hero-logo { width: clamp(120px, 20vw, 190px); margin: 0 auto 1.5rem; animation: float 7s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(167,123,255,.55)); }
 .hero h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); margin-bottom: .4rem; }
@@ -71,6 +71,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .hero-actions { display: flex; flex-direction: column; gap: .8rem; align-items: center; justify-content: center; }
 @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
 
+/* کارت‌ها */
 .grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem; backdrop-filter: blur(10px); transition: transform .4s ease, box-shadow .4s ease, border-color .4s ease; overflow: hidden; }
 .card:hover { transform: translateY(-6px); box-shadow: var(--glow); border-color: var(--accent); }
@@ -82,9 +83,11 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .card-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
 .empty-state { color: var(--text-muted); text-align: center; padding: 2rem; grid-column: 1 / -1; }
 
+/* فوتر */
 .site-footer { position: relative; z-index: 1; margin-top: 2rem; padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); background: var(--header-bg); backdrop-filter: blur(10px); }
 .footer-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 
+/* انیمیشن */
 html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
 html.js .reveal.is-visible { opacity: 1; transform: none; }
 html.js .reveal[data-delay="1"] { transition-delay: .12s; }
@@ -92,7 +95,7 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ============================================================
-   اصلاحیه نهایی: منوی همبرگری تمام‌صفحه با پس‌زمینه مات
+   واکنش‌گرا (موبایل و تبلت) - منو با Checkbox Hack
    ============================================================ */
 @media (max-width: 900px) {
   .container { width: 100% !important; padding-inline: 1rem; }
@@ -104,93 +107,107 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     align-items: center; 
     justify-content: space-between; 
   }
-  
-  .logo { margin: 0; }
-  
+
+  /* لوگو در سمت راست */
+  .logo { margin: 0; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); }
+
+  /* دکمه‌ها (منو) در سمت چپ */
   .header-actions { 
+    position: absolute; 
+    left: 1rem; 
+    top: 50%; 
+    transform: translateY(-50%); 
     display: flex; 
     align-items: center; 
     gap: 0.5rem; 
     margin: 0; 
-    order: -1;
-  }
-  
-  /* دکمه منو با تراز دقیق مرکز */
-  .menu-toggle { 
-    display: flex; 
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  /* منوی اصلی در حالت بسته مخفی شود */
-  .main-nav:not(.open) { display: none; }
-  
-  /* منوی بازشو: تمام صفحه، مات و روی همه چیز (حتی هدر) */
-  .main-nav.open {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background-color: #070b1f !important; /* پس‌زمینه سرمه‌ای کاملاً مات */
-    z-index: 99999 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-y: auto !important;
-    border: none !important;
   }
 
-  /* آیتم‌های منو: کامل، واضح و وسط */
-  .main-nav.open .nav-list { 
-    display: flex !important; 
+  /* نمایش دکمه منو */
+  .menu-toggle { display: flex; }
+
+  /* ---- منوی بازشو: تمام‌صفحه، مات، روی همه چیز ---- */
+  .main-nav { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    z-index: 10000; 
+    background: var(--bg); /* پس‌زمینه مات و رنگی مطابق تم */
+    padding: 0; 
+    margin: 0; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    overflow-y: auto;
+  }
+
+  /* وقتی چک‌باکس تیک می‌خورد، منو باز می‌شود */
+  .menu-checkbox:checked ~ .main-nav { 
+    display: flex; 
+  }
+
+  /* آیتم‌های منو */
+  .nav-list { 
+    display: flex; 
     flex-direction: column; 
     align-items: center; 
-    justify-content: center;
-    gap: 1.5rem; 
+    justify-content: center; 
+    gap: 1.25rem; 
     width: 100%; 
-    max-width: 400px; 
+    max-width: 420px; 
     margin: 0 auto; 
-    padding: 1rem;
-    list-style: none;
+    padding: 2rem 1rem; 
+    list-style: none; 
   }
-  
-  .main-nav.open .nav-list li { width: 100%; }
-  
-  .main-nav.open .nav-list a { 
-    display: block;
-    font-size: 1.3rem; 
-    padding: 1.2rem; 
+
+  .nav-list li { width: 100%; }
+
+  .nav-list a { 
+    display: block; 
     width: 100%; 
+    padding: 1.2rem 1.5rem; 
+    font-size: 1.2rem; 
     text-align: center; 
-    border-radius: 12px; 
-    background-color: #1c204a; /* پس‌زمینه آیتم‌ها */
-    border: 1px solid rgba(167, 123, 255, 0.3);
-    color: #ffffff;
-    transition: background .3s;
-  }
-  
-  .main-nav.open .nav-list a:hover { 
-    background-color: #7b4dff;
-    box-shadow: 0 0 20px rgba(167, 123, 255, 0.5);
+    border-radius: 14px; 
+    background: var(--surface-strong); 
+    border: 1px solid var(--border); 
+    color: var(--text); 
+    transition: background .25s, color .25s;
   }
 
-  /* دکمه عضویت در منو */
-  .main-nav.open .nav-list .nav-join { display: block; width: 100%; margin-top: 1rem; }
-  .main-nav.open .nav-list .nav-join a { 
-    background: linear-gradient(135deg, #7b4dff 0%, #3a6bff 55%, #ff6fd0 100%);
-    color: #fff;
-    font-weight: 800;
-    border-radius: 999px;
-    box-shadow: 0 0 20px rgba(167, 123, 255, 0.5);
-    font-size: 1.1rem;
-    padding: 1rem;
+  .nav-list a:hover { 
+    background: var(--grad); 
+    color: var(--on-accent); 
+    box-shadow: var(--glow); 
   }
 
+  /* دکمه عضویت */
+  .nav-list .nav-join { display: block; width: 100%; margin-top: 1rem; }
+  .nav-list .nav-join a { 
+    background: var(--grad); 
+    color: var(--on-accent); 
+    font-weight: 800; 
+    border-radius: 999px; 
+    box-shadow: var(--glow); 
+    font-size: 1.1rem; 
+    padding: 1rem; 
+  }
+
+  /* دکمه منو هنگام باز بودن منو: سر جای خود بماند (وسط هدر) */
+  .menu-checkbox:checked ~ .header-actions .menu-toggle {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    background: var(--surface-strong);
+  }
+
+  /* اسکرول صفحه هنگام باز بودن منو غیرفعال */
+  .menu-checkbox:checked ~ .site-wrap { overflow: hidden; }
+  .menu-checkbox:checked ~ .site-wrap .page { overflow: hidden; }
+
+  /* گریدها و کارت‌ها */
   .grid { grid-template-columns: 1fr; gap: 1rem; }
   .card { width: 100%; padding: 1rem; }
   .hero-actions { width: 100%; padding: 0 1rem; }
