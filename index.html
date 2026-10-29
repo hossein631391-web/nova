@@ -26,16 +26,55 @@
 <body>
   <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
   <div class="site-wrap">
-    <div id="site-header"></div>
+    <!-- هدر مستقیماً در HTML -->
+    <header class="site-header">
+      <div class="header-inner container">
+        <!-- چک‌باکس مخفی برای منو -->
+        <input type="checkbox" id="menu-toggle" class="menu-checkbox" hidden>
+
+        <a href="index.html" class="logo">
+          <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <radialGradient id="logo-core" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#ffb3ec"/>
+                <stop offset="70%" stop-color="#7b4dff"/><stop offset="100%" stop-color="#3a6bff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g stroke="url(#logo-core)" stroke-width="2" stroke-linecap="round" opacity=".9">
+              <line x1="32" y1="4" x2="32" y2="60"/><line x1="4" y1="32" x2="60" y2="32"/>
+              <line x1="12" y1="12" x2="52" y2="52"/><line x1="52" y1="12" x2="12" y2="52"/>
+            </g>
+            <circle cx="32" cy="32" r="16" fill="url(#logo-core)"/>
+            <circle cx="32" cy="32" r="6" fill="#fff"/>
+          </svg>
+          <span class="logo-text"><strong>NOVA</strong><small>انجمن نجوم</small></span>
+        </a>
+
+        <nav class="main-nav" id="main-nav">
+          <ul class="nav-list">
+            <li><a href="index.html" aria-current="page">خانه</a></li>
+            <li><a href="about.html">درباره ما</a></li>
+            <li><a href="events.html">رویدادها</a></li>
+            <li><a href="news.html">اخبار</a></li>
+            <li class="nav-join"><a href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a></li>
+          </ul>
+        </nav>
+
+        <div class="header-actions">
+          <label for="menu-toggle" class="menu-toggle" aria-label="باز کردن منو">
+            <span></span><span></span><span></span>
+          </label>
+        </div>
+      </div>
+    </header>
 
     <main id="main" class="page">
-      <!-- هیرو -->
       <section class="hero container">
         <div>
-          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true">
             <defs>
               <radialGradient id="hero-core" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#ffb3ec"/>
+                <stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#ffb3ec"/>
                 <stop offset="70%" stop-color="#7b4dff"/><stop offset="100%" stop-color="#3a6bff" stop-opacity="0"/>
               </radialGradient>
             </defs>
@@ -44,25 +83,23 @@
               <line x1="12" y1="12" x2="52" y2="52"/><line x1="52" y1="12" x2="12" y2="52"/>
             </g>
             <circle cx="32" cy="32" r="16" fill="url(#hero-core)"/>
-            <circle cx="32" cy="32" r="6" fill="#ffffff"/>
+            <circle cx="32" cy="32" r="6" fill="#fff"/>
           </svg>
           <h1 class="gradient-text reveal">انجمن نجوم و فناوری‌های فضایی NOVA</h1>
           <p class="slogan reveal" data-delay="1">ستاره‌ها را نگاه کنیم، پرسش‌ها را بپرسیم؛ هر شب، زیر آسمانی بی‌کران.</p>
           <div class="hero-actions reveal" data-delay="2">
-            <a class="btn btn-join" href="membership.html">عضویت در انجمن</a>
+            <a class="btn btn-join" href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>
             <a class="btn btn-ghost" href="events.html">رویدادهای پیش رو</a>
           </div>
         </div>
       </section>
 
-      <!-- رویدادهای نزدیک -->
       <section class="section container" aria-labelledby="upcoming-title">
         <h2 id="upcoming-title" class="section-title reveal">رویدادهای نزدیک</h2>
         <div id="upcoming-events" class="grid"></div>
         <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="events.html">همه رویدادها و رصدها</a></p>
       </section>
 
-      <!-- آخرین مقالات -->
       <section class="section container" aria-labelledby="latest-title">
         <h2 id="latest-title" class="section-title reveal">آخرین مقالات و اخبار</h2>
         <div id="latest-articles" class="grid"></div>
@@ -74,51 +111,12 @@
   </div>
 
   <script src="assets/js/stars.js" defer></script>
-  <script src="assets/js/main.js" defer></script>
   <script src="data/events.js" defer></script>
   <script src="data/articles.js" defer></script>
   <script>
+    // فقط برای بارگذاری کارت‌ها و تم؛ بدون مدیریت منو
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
-
-      // تزریق دکمه عضویت و منوی همبرگری
-      function injectMobileMenu() {
-        // ۱. اضافه کردن لینک عضویت به منو
-        var navList = document.querySelector('.nav-list');
-        if (navList && !navList.querySelector('.nav-join')) {
-          var li = document.createElement('li');
-          li.className = 'nav-join';
-          li.innerHTML = '<a href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>';
-          navList.appendChild(li);
-        }
-
-        // ۲. اضافه کردن دکمه منو اگر وجود نداشت (اگر main.js آن را نساخته باشد)
-        var headerActions = document.querySelector('.header-actions');
-        if (headerActions && !headerActions.querySelector('.menu-toggle')) {
-          var btn = document.createElement('button');
-          btn.className = 'menu-toggle';
-          btn.setAttribute('aria-label', 'باز کردن منو');
-          btn.setAttribute('aria-expanded', 'false');
-          btn.innerHTML = '<span></span><span></span><span></span>';
-          headerActions.appendChild(btn);
-        }
-
-        // ۳. فعال کردن عملکرد دکمه منو
-        var menuToggle = document.querySelector('.menu-toggle');
-        var mainNav = document.querySelector('.main-nav');
-        if (menuToggle && mainNav) {
-          // حذف لیسنر قبلی برای جلوگیری از تداخل
-          var newToggle = menuToggle.cloneNode(true);
-          menuToggle.parentNode.replaceChild(newToggle, menuToggle);
-          newToggle.addEventListener('click', function() {
-            var expanded = this.getAttribute('aria-expanded') === 'true';
-            this.setAttribute('aria-expanded', !expanded);
-            mainNav.classList.toggle('open');
-          });
-        }
-      }
-      setTimeout(injectMobileMenu, 300);
-
       var safe = function (v) {
         return (N && typeof N.escapeHtml === "function") ? N.escapeHtml(String(v||"")) : String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       };
