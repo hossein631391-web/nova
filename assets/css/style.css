@@ -13,7 +13,7 @@ a:hover { color: var(--accent-3); }
 h1, h2, h3, h4 { line-height: 1.4; margin: 0 0 .6em; font-weight: 800; }
 p { margin: 0 0 1em; }
 
-/* --- مخفی کردن کامل لینک "رفتن به محتوای اصلی" --- */
+/* مخفی کردن کامل لینک "رفتن به محتوای اصلی" */
 .skip-link { display: none !important; }
 
 /* ساختار */
@@ -112,39 +112,24 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     min-height: 72px; 
     display: flex; 
     align-items: center; 
-    justify-content: center; /* برای اطمینان از چیدمان */
+    justify-content: space-between; 
   }
   
-  /* لوگو و منو در سمت راست */
-  .logo { 
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    margin: 0;
-    z-index: 2;
-  }
+  .logo { margin: 0; }
   
-  /* دکمه‌ها: منو در سمت راست کنار لوگو، ماه در چپ */
+  /* دکمه‌های سمت چپ (تم و منو) سر جای خودشان هستند */
   .header-actions { 
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0;
-    z-index: 2;
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    margin: 0; 
+    order: -1; /* انتقال به سمت چپ در RTL */
   }
-
-  /* منوی سه‌خط را به سمت راست (کنار لوگو) منتقل می‌کنیم */
-  .header-actions .menu-toggle {
-    position: absolute;
-    right: -35px; /* کنار لوگو */
-    top: 50%;
-    transform: translateY(-50%);
-    margin: 0;
+  
+  /* دکمه منوی سه‌خط */
+  .menu-toggle { 
+    display: inline-flex; 
+    margin: 0; 
   }
   
   /* منوی اصلی در هدر مخفی شود */
@@ -166,13 +151,39 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     padding: 2rem;
   }
 
-  .nav-list { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; width: 100%; max-width: 400px; margin: 0 auto; }
-  .nav-list a { font-size: 1.3rem; padding: .8rem 1.5rem; width: 100%; text-align: center; border-radius: 12px; background: transparent; }
+  .nav-list { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 1.5rem; 
+    width: 100%; 
+    max-width: 400px; 
+    margin: 0 auto; 
+  }
+  
+  .nav-list a { 
+    font-size: 1.3rem; 
+    padding: .8rem 1.5rem; 
+    width: 100%; 
+    text-align: center; 
+    border-radius: 12px; 
+    background: transparent; 
+  }
+  
   .nav-list a:hover { background: var(--surface); }
 
   /* دکمه عضویت در منو */
   .nav-list .nav-join { display: block; width: 100%; margin-top: 1rem; }
-  .nav-list .nav-join a { background: var(--grad); color: var(--on-accent); text-align: center; font-weight: 800; border-radius: 999px; box-shadow: var(--glow); font-size: 1.1rem; padding: 1rem; }
+  .nav-list .nav-join a { 
+    background: var(--grad); 
+    color: var(--on-accent); 
+    text-align: center; 
+    font-weight: 800; 
+    border-radius: 999px; 
+    box-shadow: var(--glow); 
+    font-size: 1.1rem; 
+    padding: 1rem; 
+  }
   .nav-list .nav-join a:hover { filter: brightness(1.1); color: var(--on-accent); }
 
   /* تمام صفحه شدن کارت‌ها */
