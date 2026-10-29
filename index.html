@@ -26,7 +26,49 @@
 <body>
   <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
   <div class="site-wrap">
-    <div id="site-header"></div>
+    <!-- هدر مستقیماً در HTML -->
+    <header class="site-header">
+      <div class="header-inner container">
+        <a href="index.html" class="logo">
+          <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <radialGradient id="logo-core" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#ffb3ec"/>
+                <stop offset="70%" stop-color="#7b4dff"/><stop offset="100%" stop-color="#3a6bff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g stroke="url(#logo-core)" stroke-width="2" stroke-linecap="round" opacity=".9">
+              <line x1="32" y1="4" x2="32" y2="60"/><line x1="4" y1="32" x2="60" y2="32"/>
+              <line x1="12" y1="12" x2="52" y2="52"/><line x1="52" y1="12" x2="12" y2="52"/>
+            </g>
+            <circle cx="32" cy="32" r="16" fill="url(#logo-core)"/>
+            <circle cx="32" cy="32" r="6" fill="#fff"/>
+          </svg>
+          <span class="logo-text"><strong>NOVA</strong><small>انجمن نجوم</small></span>
+        </a>
+
+        <nav class="main-nav" id="main-nav">
+          <ul class="nav-list">
+            <li><a href="index.html" aria-current="page">خانه</a></li>
+            <li><a href="about.html">درباره ما</a></li>
+            <li><a href="events.html">رویدادها</a></li>
+            <li><a href="news.html">اخبار</a></li>
+            <li class="nav-join"><a href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a></li>
+          </ul>
+        </nav>
+
+        <div class="header-actions">
+          <button class="theme-toggle" aria-label="تغییر تم">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <button class="menu-toggle" aria-label="باز کردن منو" aria-expanded="false" aria-controls="main-nav">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
     <main id="main" class="page">
       <section class="hero container">
         <div>
@@ -65,29 +107,40 @@
         <p class="card-actions reveal"><a class="btn btn-ghost btn-sm" href="news.html">همه اخبار و مقالات</a></p>
       </section>
     </main>
-    <div id="site-footer"></div>
   </div>
 
+  <!-- اسکریپت منوی همبرگری و تم -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var menuToggle = document.querySelector('.menu-toggle');
+      var mainNav = document.getElementById('main-nav');
+      
+      if (menuToggle && mainNav) {
+        menuToggle.addEventListener('click', function() {
+          var expanded = this.getAttribute('aria-expanded') === 'true';
+          this.setAttribute('aria-expanded', !expanded);
+          mainNav.classList.toggle('open');
+        });
+      }
+
+      // تم
+      var themeToggle = document.querySelector('.theme-toggle');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          var current = document.documentElement.getAttribute('data-theme');
+          var next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('nova-theme', next);
+        });
+      }
+    });
+  </script>
   <script src="assets/js/stars.js" defer></script>
-  <script src="assets/js/main.js" defer></script>
   <script src="data/events.js" defer></script>
   <script src="data/articles.js" defer></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
-      
-      // تزریق عضویت به منو
-      function injectMobileJoinBtn() {
-        var navList = document.querySelector('.nav-list');
-        if (navList && !navList.querySelector('.nav-join')) {
-          var li = document.createElement('li');
-          li.className = 'nav-join';
-          li.innerHTML = '<a href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>';
-          navList.appendChild(li);
-        }
-      }
-      setTimeout(injectMobileJoinBtn, 150);
-
       var safe = function (v) {
         return (N && typeof N.escapeHtml === "function") ? N.escapeHtml(String(v||"")) : String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       };
@@ -97,7 +150,7 @@
       var upcoming = (window.NOVA_EVENTS || []).filter(function (ev) { return isFuture(ev.date); }).sort(function (a, b) { return a.date < b.date ? -1 : 1; }).slice(0, 3);
       var evBox = document.getElementById("upcoming-events");
       if (evBox) {
-        evBox.innerHTML = upcoming.length ? upcoming.map(function (ev, i) {
+        evBox.innerHTML = upcoming.length ? upcoming.map(function (ev) {
           return '<article class="card reveal"><span class="tag tag-future">' + safe(typeLabels[ev.type] || "") + '</span><h3>' + safe(ev.title) + '</h3><div class="meta"><span>' + safe(ev.jalali) + '</span></div><p>' + safe(ev.description) + '</p><div class="card-actions"><a class="btn btn-sm" href="' + safe(ev.link) + '">ثبت‌نام</a></div></article>';
         }).join("") : '<p class="empty-state">رویدادی ثبت نشده است.</p>';
       }
