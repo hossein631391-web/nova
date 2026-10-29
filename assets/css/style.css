@@ -43,14 +43,14 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .header-actions { display: flex; align-items: center; gap: .6rem; }
 .header-actions .btn-join { display: none !important; }
 
-.theme-toggle, .menu-toggle { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: grid; place-items: center; cursor: pointer; transition: transform .3s, box-shadow .3s, border-color .3s; }
+.theme-toggle, .menu-toggle { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .3s, box-shadow .3s, border-color .3s; }
 .theme-toggle:hover, .menu-toggle:hover { transform: rotate(-12deg) scale(1.06); box-shadow: var(--glow); border-color: var(--accent); }
 .theme-toggle svg { width: 20px; height: 20px; }
 .theme-toggle .icon-sun { display: none; }
 [data-theme="light"] .theme-toggle .icon-sun { display: block; }
 [data-theme="light"] .theme-toggle .icon-moon { display: none; }
 
-.menu-toggle { display: none; flex-direction: column; gap: 4px; }
+.menu-toggle { display: none; flex-direction: column; gap: 4px; padding: 0; }
 .menu-toggle span { display: block; width: 18px; height: 2px; background: currentColor; border-radius: 2px; transition: transform .3s, opacity .3s; }
 .menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
 .menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
@@ -92,7 +92,7 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ============================================================
-   واکنش‌گرا (موبایل) - منوی همبرگری
+   واکنش‌گرا (موبایل) - منوی همبرگری با پس‌زمینه رنگی
    ============================================================ */
 @media (max-width: 900px) {
   .container { width: 100% !important; padding-inline: 1rem; }
@@ -116,12 +116,16 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
   }
   
   /* دکمه منو در گوشی نمایش داده شود */
-  .menu-toggle { display: inline-flex; }
+  .menu-toggle { 
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+  }
   
   /* منوی اصلی در حالت بسته مخفی شود */
   .main-nav:not(.open) { display: none; }
   
-  /* منوی بازشو: تمام صفحه */
+  /* منوی بازشو: تمام صفحه با پس‌زمینه رنگی */
   .main-nav.open {
     display: flex !important;
     flex-direction: column;
@@ -129,34 +133,46 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     align-items: center;
     position: fixed;
     inset: 0;
-    background: rgba(20, 24, 58, 0.98);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    background: var(--bg-2); /* پس‌زمینه رنگی */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     z-index: 1000;
     margin: 0;
     padding: 2rem;
+    overflow-y: auto;
   }
 
   .nav-list { 
     display: flex !important; 
     flex-direction: column; 
     align-items: center; 
-    gap: 1.5rem; 
+    gap: 1rem; 
     width: 100%; 
-    max-width: 400px; 
+    max-width: 450px; 
     margin: 0 auto; 
   }
   
+  .nav-list li {
+    width: 100%;
+  }
+  
   .nav-list a { 
-    font-size: 1.3rem; 
-    padding: .8rem 1.5rem; 
+    display: block;
+    font-size: 1.2rem; 
+    padding: 1rem 1.5rem; 
     width: 100%; 
     text-align: center; 
     border-radius: 12px; 
-    background: transparent; 
+    background: var(--surface); 
+    border: 1px solid var(--border);
+    color: var(--text);
   }
   
-  .nav-list a:hover { background: var(--surface); }
+  .nav-list a:hover { 
+    background: var(--surface-strong); 
+    color: var(--accent);
+    box-shadow: var(--glow);
+  }
 
   .nav-list .nav-join { display: block; width: 100%; margin-top: 1rem; }
   .nav-list .nav-join a { 
