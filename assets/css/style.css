@@ -14,6 +14,7 @@ h1, h2, h3, h4 { line-height: 1.4; margin: 0 0 .6em; font-weight: 800; }
 p { margin: 0 0 1em; }
 .skip-link { display: none !important; }
 
+/* ساختار */
 .site-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
 .container { width: min(1100px, 100% - 2.5rem); margin-inline: auto; }
 main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
@@ -22,6 +23,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .section-title::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--grad); box-shadow: var(--glow); }
 .gradient-text { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
+/* هدر */
 .site-header { position: sticky; top: 0; z-index: 50; background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: background .4s, box-shadow .4s, border-color .4s; }
 .site-header.is-scrolled { border-bottom-color: var(--border); box-shadow: var(--shadow); background: color-mix(in srgb, var(--header-bg) 92%, transparent); }
 .header-inner { display: flex; align-items: center; gap: 1rem; min-height: 72px; transition: min-height .4s; position: relative; }
@@ -56,6 +58,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
+/* دکمه‌ها */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .7rem 1.4rem; border-radius: 999px; border: 1px solid transparent; background: var(--grad); color: var(--on-accent); font: inherit; font-weight: 700; font-size: .95rem; cursor: pointer; box-shadow: var(--glow); transition: transform .3s ease, box-shadow .35s ease, filter .3s ease; white-space: nowrap; }
 .btn:hover { color: var(--on-accent); transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 0 26px rgba(167,123,255,.8), 0 0 60px rgba(255,111,208,.4); }
 .btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: none; }
@@ -64,6 +67,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .btn-join { animation: glow-pulse 3.2s ease-in-out infinite; }
 @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 12px rgba(167,123,255,.45); } 50% { box-shadow: 0 0 26px rgba(255,111,208,.65), 0 0 48px rgba(123,77,255,.35); } }
 
+/* هیرو */
 .hero { min-height: 78vh; display: grid; place-items: center; text-align: center; padding: 4rem 0 3rem; }
 .hero-logo { width: clamp(120px, 20vw, 190px); margin: 0 auto 1.5rem; animation: float 7s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(167,123,255,.55)); }
 .hero h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); margin-bottom: .4rem; }
@@ -71,6 +75,7 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .hero-actions { display: flex; flex-direction: column; gap: .8rem; align-items: center; justify-content: center; }
 @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
 
+/* کارت و گرید */
 .grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem; backdrop-filter: blur(10px); transition: transform .4s ease, box-shadow .4s ease, border-color .4s ease; overflow: hidden; }
 .card:hover { transform: translateY(-6px); box-shadow: var(--glow); border-color: var(--accent); }
@@ -82,9 +87,11 @@ main.page { flex: 1; position: relative; z-index: 1; padding-bottom: 3rem; }
 .card-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
 .empty-state { color: var(--text-muted); text-align: center; padding: 2rem; grid-column: 1 / -1; }
 
+/* فوتر */
 .site-footer { position: relative; z-index: 1; margin-top: 2rem; padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); background: var(--header-bg); backdrop-filter: blur(10px); }
 .footer-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 
+/* انیمیشن */
 html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
 html.js .reveal.is-visible { opacity: 1; transform: none; }
 html.js .reveal[data-delay="1"] { transition-delay: .12s; }
@@ -96,6 +103,9 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
    ============================================================ */
 @media (max-width: 900px) {
   .container { width: 100% !important; padding-inline: 1rem; }
+
+  /* نمایش دکمه منو در موبایل */
+  .menu-toggle { display: inline-flex; }
 
   .header-inner { 
     position: relative; 
@@ -112,16 +122,13 @@ html.js .reveal[data-delay="2"] { transition-delay: .24s; }
     align-items: center; 
     gap: 0.5rem; 
     margin: 0; 
-    order: -1; 
+    order: -1; /* انتقال به سمت چپ در RTL */
   }
   
-  .menu-toggle { 
-    display: inline-flex; 
-    margin: 0; 
-  }
-  
+  /* منوی اصلی در هدر مخفی شود */
   .main-nav:not(.open) { display: none; }
   
+  /* منوی بازشو: تمام صفحه */
   .main-nav.open {
     display: flex;
     flex-direction: column;
