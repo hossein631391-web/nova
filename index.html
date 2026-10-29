@@ -81,8 +81,9 @@
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
 
-      // تزریق عضویت به منو
-      function injectMobileJoinBtn() {
+      // تزریق دکمه عضویت و منوی همبرگری
+      function injectMobileMenu() {
+        // ۱. اضافه کردن لینک عضویت به منو
         var navList = document.querySelector('.nav-list');
         if (navList && !navList.querySelector('.nav-join')) {
           var li = document.createElement('li');
@@ -90,8 +91,33 @@
           li.innerHTML = '<a href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>';
           navList.appendChild(li);
         }
+
+        // ۲. اضافه کردن دکمه منو اگر وجود نداشت (اگر main.js آن را نساخته باشد)
+        var headerActions = document.querySelector('.header-actions');
+        if (headerActions && !headerActions.querySelector('.menu-toggle')) {
+          var btn = document.createElement('button');
+          btn.className = 'menu-toggle';
+          btn.setAttribute('aria-label', 'باز کردن منو');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.innerHTML = '<span></span><span></span><span></span>';
+          headerActions.appendChild(btn);
+        }
+
+        // ۳. فعال کردن عملکرد دکمه منو
+        var menuToggle = document.querySelector('.menu-toggle');
+        var mainNav = document.querySelector('.main-nav');
+        if (menuToggle && mainNav) {
+          // حذف لیسنر قبلی برای جلوگیری از تداخل
+          var newToggle = menuToggle.cloneNode(true);
+          menuToggle.parentNode.replaceChild(newToggle, menuToggle);
+          newToggle.addEventListener('click', function() {
+            var expanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !expanded);
+            mainNav.classList.toggle('open');
+          });
+        }
       }
-      setTimeout(injectMobileJoinBtn, 150);
+      setTimeout(injectMobileMenu, 300);
 
       var safe = function (v) {
         return (N && typeof N.escapeHtml === "function") ? N.escapeHtml(String(v||"")) : String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
