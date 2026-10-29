@@ -32,10 +32,10 @@
       <!-- هیرو -->
       <section class="hero container">
         <div>
-          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true">
+          <svg class="hero-logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
             <defs>
               <radialGradient id="hero-core" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#ffb3ec"/>
+                <stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#ffb3ec"/>
                 <stop offset="70%" stop-color="#7b4dff"/><stop offset="100%" stop-color="#3a6bff" stop-opacity="0"/>
               </radialGradient>
             </defs>
@@ -44,13 +44,13 @@
               <line x1="12" y1="12" x2="52" y2="52"/><line x1="52" y1="12" x2="12" y2="52"/>
             </g>
             <circle cx="32" cy="32" r="16" fill="url(#hero-core)"/>
-            <circle cx="32" cy="32" r="6" fill="#fff"/>
+            <circle cx="32" cy="32" r="6" fill="#ffffff"/>
           </svg>
           <h1 class="gradient-text reveal">انجمن نجوم و فناوری‌های فضایی NOVA</h1>
           <p class="slogan reveal" data-delay="1">ستاره‌ها را نگاه کنیم، پرسش‌ها را بپرسیم؛ هر شب، زیر آسمانی بی‌کران.</p>
           <div class="hero-actions reveal" data-delay="2">
+            <a class="btn btn-join" href="membership.html">عضویت در انجمن</a>
             <a class="btn btn-ghost" href="events.html">رویدادهای پیش رو</a>
-            <a class="btn btn-join" href="https://hossein631391-web.github.io/nova/membership.html">عضویت در انجمن</a>
           </div>
         </div>
       </section>
@@ -77,12 +77,11 @@
   <script src="assets/js/main.js" defer></script>
   <script src="data/events.js" defer></script>
   <script src="data/articles.js" defer></script>
-  
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       var N = window.Nova;
 
-      // تزریق دکمه عضویت به منوی همبرگری با لینک کامل
+      // تزریق عضویت به منو
       function injectMobileJoinBtn() {
         var navList = document.querySelector('.nav-list');
         if (navList && !navList.querySelector('.nav-join')) {
@@ -92,7 +91,7 @@
           navList.appendChild(li);
         }
       }
-      setTimeout(injectMobileJoinBtn, 200);
+      setTimeout(injectMobileJoinBtn, 150);
 
       var safe = function (v) {
         return (N && typeof N.escapeHtml === "function") ? N.escapeHtml(String(v||"")) : String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
